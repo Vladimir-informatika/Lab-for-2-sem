@@ -17,12 +17,11 @@ int menu(int var=1);
 int main()
 {
     clean();
-    int size=1;//количество фигур
+    int size=100;//количество фигур
     polygon *poly = new polygon[size];
     int flag=1;
     while(flag==1)
     {
-      polygon *poly = new polygon[size];
       int choice=10;
       choice=menu();
       switch(choice)
@@ -45,31 +44,33 @@ int main()
           }
         case(1):
           {
-            cout<<"amount of angles: ";
-            cin>>poly[size].amount;
-            cout<<"length of side: ";
-            cin>>poly[size].length;
-            cout<<poly[size].length<<"\n";
-            poly[size].perimetr=count_perimetr(&poly[size]);
-            poly[size].square=count_square(&poly[size]);
-            size++;
+          int i=0;
+            cout<<"Input number of your polygon";
+            cin>>i;
+          cout<<"amount of angles: ";
+          cin>>poly[i].amount;
+          cout<<"length of side: ";
+          cin>>poly[i].length;
+          cout<<poly[i].length<<"\n";
+          poly[i].perimetr=count_perimetr(&poly[i]);
+          poly[i].square=count_square(&poly[i]);
+          clean();
           break;}
         case(2):
           { 
             int i=0;
             cout<<"\nInput number of your polygon:";
             cin>>i;
-            cout<<"amount of angles: "<<poly[i-1].amount;
-            cout<<"\nlength of side: "<<poly[i-1].length;
-            cout<<"\nPerimrtr: "<<poly[i-1].perimetr;
-            cout<<"\nSquare: "<<poly[i-1].square<<"\n";
+            cout<<"amount of angles: "<<poly[i].amount;
+            cout<<"\nlength of side: "<<poly[i].length;
+            cout<<"\nPerimrtr: "<<poly[i].perimetr;
+            cout<<"\nSquare: "<<poly[i].square<<"\n";
           break;
           }
-          
-        default: cout<<"\nError, try another number!\n";break;
+        default: clean();cout<<"\nError, try another number!\n";break;
     }
     }
-    delete[] poly;
+  delete[] poly;
     return 0;
 }
 int count_square(polygon *poly)
