@@ -14,6 +14,7 @@ int count_square(polygon *poly);
 int count_perimetr(polygon *poly);
 void clean(int var =1);
 int menu(int var=1);
+int prove(polygon *poly);
 int main()
 {
     clean();
@@ -44,13 +45,19 @@ int main()
           }
         case(1):
           {
+          clean();
           int i=0;
-            cout<<"Input number of your polygon";
-            cin>>i;
+          cout<<"Input number of your polygon";
+          cin>>i;
           cout<<"amount of angles: ";
           cin>>poly[i].amount;
           cout<<"length of side: ";
           cin>>poly[i].length;
+          if (prove(&poly[i])==1)
+          {
+            cout<<"Error\n";
+            break;
+          }
           cout<<poly[i].length<<"\n";
           poly[i].perimetr=count_perimetr(&poly[i]);
           poly[i].square=count_square(&poly[i]);
@@ -58,14 +65,22 @@ int main()
           break;}
         case(2):
           { 
+            clean();
             int i=0;
+            int cont=0;
             cout<<"\nInput number of your polygon:";
             cin>>i;
             cout<<"amount of angles: "<<poly[i].amount;
             cout<<"\nlength of side: "<<poly[i].length;
             cout<<"\nPerimrtr: "<<poly[i].perimetr;
             cout<<"\nSquare: "<<poly[i].square<<"\n";
-          break;
+            cout<<"input 1 to continue ";
+            cin>>cont;
+            if(cont==1)
+            {
+              clean();
+              break;
+            }
           }
         default: clean();cout<<"\nError, try another number!\n";break;
     }
@@ -76,7 +91,16 @@ int main()
 int count_square(polygon *poly)
 {
   int result=0;
+  if(poly->amount==3){
+    result=(((poly->length)*(poly->length))*sqrt(3))/4;
+  }
+  else if(poly->amount==4){
+    result=((poly->length)*(poly->length));
+  }
+  else
+  {
   result = ((poly->amount) * (poly->length) * (poly->length)) / (4 * tan(M_PI / (poly->amount)));
+  }
    return result;
 }
 
@@ -104,3 +128,14 @@ int menu(int var)
   cin>> choice;
   return choice;
 }
+int prove(polygon *poly)
+{
+  int flag=0;
+  if((poly->amount<3) or (poly->amount>100) or (poly->length<1) or (poly->length>1000))
+    {
+      flag=1;
+    }
+  return flag;
+}
+
+
