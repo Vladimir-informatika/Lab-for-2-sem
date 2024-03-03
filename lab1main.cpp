@@ -15,6 +15,8 @@ int count_perimetr(polygon *poly);
 void clean(int var =1);
 int menu(int var=1);
 int prove(polygon *poly);
+void search_coords(polygon *poly,int i);
+void output_coords(polygon *poly);
 int main()
 {
     clean();
@@ -74,6 +76,7 @@ int main()
             cout<<"\nlength of side: "<<poly[i].length;
             cout<<"\nPerimrtr: "<<poly[i].perimetr;
             cout<<"\nSquare: "<<poly[i].square<<"\n";
+            output_coords(&poly[i]);
             cout<<"input 1 to continue ";
             cin>>cont;
             if(cont==1)
@@ -137,5 +140,28 @@ int prove(polygon *poly)
     }
   return flag;
 }
-
+void search_coords(polygon *poly,int i)
+{
+  float a=0;//angle
+  float a_temp=0;
+  a=((poly->amount-2)*M_PI)/poly->amount;
+  cout<<"\n"<<a<<"\n";
+  poly->coords[1].x=poly->coords[0].x-(poly->length);
+  poly->coords[1].y=poly->coords[0].y;
+  cout<<"\n"<<poly->coords[1].x<<"\t"<<poly->coords[1].y;
+  for(int j=2; j<poly->amount; j=j+1)
+    {
+      poly->coords[j].x=poly->coords[j-1].x-(pow(-1,j+1))*(poly->length)*cos(M_PI-a+a_temp);
+      poly->coords[j].y=poly->coords[j-1].y-(pow(-1,j))*(poly->length)*sin(M_PI-a+a_temp);
+      a_temp=(a)+a_temp;
+      cout<<"\n"<<poly->coords[j].x<<"\t"<<poly->coords[j].y;
+    }
+}
+void output_coords(polygon *poly)
+{
+  for (int j=0; j<poly->amount; j=j+1)
+    {
+      cout<<poly->coords[j].x<<"\t"<<poly->coords[j].y<<"\n";
+    }
+}
 
