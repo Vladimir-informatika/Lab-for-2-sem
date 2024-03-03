@@ -12,7 +12,7 @@ struct polygon
     int length;
     int square;
     int perimetr;
-    coordinates *coords=new coordinates[100];
+    coordinates *coords=new coordinates[200];
 };
 int count_square(polygon *poly);
 int count_perimetr(polygon *poly);
@@ -21,6 +21,7 @@ int menu(int var=1);
 int prove(polygon *poly);
 void search_coords(polygon *poly);
 void output_coords(polygon *poly);
+void delete_polygon(polygon *poly, int &size,int del_index);
 int main()
 {
     clean();
@@ -99,6 +100,15 @@ int main()
               break;
             }
           }
+        case(3):
+          {
+            clean();
+            cout<<"\nInput number of polygon you want delete: ";
+            int del_index=0;
+            cin>>del_index;
+            delete_polygon(adres,size,del_index);
+            break;
+          }
         default: clean();cout<<"\nError, try another number!\n";break;
     }
     }
@@ -139,8 +149,9 @@ int menu(int var)
 {
   cout<<"Inter a number to choose action:\n";
   cout<<"0 for exit\n";
-  cout<<"1 for adding polynom\n";
+  cout<<"1 for adding polygom\n";
   cout<<"2 for output information about polygon\n";
+  cout<<"3 for deleting polygom\n";
   int choice=10;
   cin>> choice;
   return choice;
@@ -177,4 +188,28 @@ void output_coords(polygon *poly)
     {
       cout<<poly->coords[j].x<<"\t"<<poly->coords[j].y<<"\n";
     }
+}
+void delete_polygon(polygon *poly, int &size,int del_index)
+{
+  if (del_index>=0 && del_index<size)
+  {
+    polygon* newTempArray=new polygon[size-1];
+    int newIndex=0;
+    for(int i=0; i<size; i=i+1)
+      {
+        if(i!=del_index)
+        {
+          newTempArray[newIndex]=poly[i];
+          newIndex++;
+        }
+      }
+    delete[] poly;
+    delete[] poly->coords;
+    poly=newTempArray;
+    size--;
+    cout<<"Polygon deleted\n";
+  }
+  else{
+    cout<<"\nError\tNO SUCH POLYGON\n";
+  }
 }
