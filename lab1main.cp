@@ -87,6 +87,7 @@ int main()
             int cont=0;
             cout<<"\nInput number of your polygon:";
             cin>>i;
+            if ((i<size) && (i>=0)){
             cout<<"amount of angles: "<<adres[i].amount;
             cout<<"\nlength of side: "<<adres[i].length;
             cout<<"\nPerimrtr: "<<adres[i].perimetr;
@@ -97,6 +98,11 @@ int main()
             if(cont==1)
             {
               clean();
+              break;
+            }
+            }
+            else{
+              cout<<"NO SUCH POLYGON\n";
               break;
             }
           }
@@ -204,8 +210,8 @@ void delete_polygon(polygon *poly, int &size,int del_index)
         }
       }
     delete[] poly;
-    delete[] poly->coords;
-    poly=newTempArray;
+    *poly=*newTempArray;
+    delete[] newTempArray;
     size--;
     cout<<"Polygon deleted\n";
   }
