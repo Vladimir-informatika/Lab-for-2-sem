@@ -18,7 +18,7 @@ struct regular_polygon{
 
 void CountSquare(struct regular_polygon* reg_pol, int amount);
 void CountPerimeter(struct regular_polygon* reg_pol, int amount);
-void SetData(regular_polygon* reg_pol, int amount);
+void SetData(regular_polygon* reg_pol, int amount, int* output);
 regular_polygon* AddStruct(regular_polygon* reg_pol, int amount, int* output);
 int* max_square(struct regular_polygon* reg_pol, int amount);
 int* max_perimeter(struct regular_polygon* reg_pol, int amount);
@@ -37,17 +37,9 @@ int main()
     output[0] = 1;
     cout << "Hello!" << '\n';
     menu(OurPolygon, PolygonAmount, output);
-
-
-
+    check(OurPolygon, PolygonAmount, output);
     /*double ang = ((reg_pol.count_sides - 2) * M_PI) / (reg_pol.count_sides);
     double R = reg_pol.length / (2 * sin(M_PI / (reg_pol.count_sides)));*/
-
-
-    /*for (int i = 0; i < reg_pol.count_sides; i++)
-    {
-
-    }*/
     return 0;
 }
 
@@ -91,13 +83,13 @@ regular_polygon* AddStruct(regular_polygon* reg_pol, int amount, int* output)
 
         reg_pol = temp;
         output = temp2;
-        output[amount] = 1;
     }
     return reg_pol;
 }
 
-void SetData(regular_polygon* reg_pol, int amount)
+void SetData(regular_polygon* reg_pol, int amount, int* output)
 {
+    output[amount] = 1;
     cout << "Enter count of sides:" << '\n';
     cin >> reg_pol[amount].count_sides;
     bool flag = false;
@@ -164,7 +156,10 @@ int* max_perimeter(regular_polygon* reg_pol, int amount)
 
 int* del_struct(int* output, int choosenForDelete)
 {
-    output[choosenForDelete - 1] = 0;
+    if (choosenForDelete == 0)
+        return output;
+    else
+        output[choosenForDelete - 1] = 0;
     return output;
 }
 /////// ОГРАНИЧЕНИЯ///////
@@ -184,9 +179,11 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     {
     case 1:
         OurPolygon = AddStruct(OurPolygon, PolygonAmount, output);
-        SetData(OurPolygon, PolygonAmount);
+        SetData(OurPolygon, PolygonAmount, output);
         PolygonAmount++;
     case 2:
+        cout << '\n';
+
         cout << "OK, let's look" << '\n';
         print(OurPolygon, PolygonAmount, output);
         menu(OurPolygon, PolygonAmount, output);
@@ -206,7 +203,7 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
         else
         {
             cout << "As you wish" << '\n';
-            del_struct(output, chosenForDelete);
+            output = del_struct(output, chosenForDelete);
             menu(OurPolygon, PolygonAmount, output);
         }
     case 4:
@@ -246,7 +243,7 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
             menu(OurPolygon, PolygonAmount, output);
         }
     case 5:
-            check(OurPolygon, PolygonAmount, output);
+            return;
     default:
         cout << "Incorrect! Try again" << '\n';
         menu(OurPolygon, PolygonAmount, output);
@@ -267,7 +264,7 @@ void print(regular_polygon* reg_pol, int amount, int* output)
 
             CountSquare(reg_pol, amount);
             CountPerimeter(reg_pol, amount);
-            cout << "Good job!" << '\n';
+            cout << "Good job!" << '\n' << '\n';
         }
         else
         {
@@ -278,58 +275,22 @@ void print(regular_polygon* reg_pol, int amount, int* output)
 
 void check(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 {
-    cout << "Are you sure that you want to quit? (1 - yes; 2 - no)" << '\n';
+    cout << "Are you sure that you want to quit? (1 - yes; 0 - no)" << '\n';
     int k;
     cin >> k;
     switch (k)
     {
     case 1:
         return;
-    case 2:
+    case 0:
         menu(OurPolygon, PolygonAmount, output);
     default:
         cout << "Incorrect! Try again" << '\n';
         check(OurPolygon, PolygonAmount, output);
     }
+
 }
 
-
-    cout << "Enter y:"<<'\n';
-    cin >> reg_pol->y;
-}
-
-void square(struct regular_polygon *reg_pol)
-{
-    reg_pol->square = 0.25 * (double)reg_pol->count_sides * reg_pol->length * reg_pol->length * pow(tan(M_PI/((double)reg_pol->count_sides)), -1.0);
-    cout << "Square = " << reg_pol->square << '\n';
-}
-
-void perimeter(struct regular_polygon *reg_pol)
-{
-    reg_pol->perimeter = reg_pol->count_sides * reg_pol->length;
-    cout << "Perimeter = " << reg_pol->perimeter << '\n';
-}
-
-
-int main()
-{
-    regular_polygon *rg;
-    rg = &reg_pol;
-    input(rg);
-    perimeter(rg);
-    square(rg);
-    double ang = ((reg_pol.count_sides - 2) * M_PI)/(reg_pol.count_sides);
-    double R = reg_pol.length/(2 * sin(M_PI/(reg_pol.count_sides)));
-    double xO = reg_pol.x + R;
-    double yO = reg_pol.y;
-    for (int i = 0; i < reg_pol.count_sides; i++)
-    {
-        x1 = xO + R * sin(i * ang);
-        y1 = yO + R * cos(i * ang);
-        i++;
-        cout << "x" << x1 << i << '\n';
-        cout << "y" << y1 << i << '\n';
-
-    }
-    return 0;
-}
+// Quit the programm
+// Big data
+// angles
