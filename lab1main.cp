@@ -10,7 +10,7 @@ double y;
 };
 struct polygon
 {
-    double amount;
+    int amount;
     double length;
     double square;
     double perimetr;
@@ -23,16 +23,16 @@ int menu(int var=1);
 int prove(polygon *poly);
 void search_coords(polygon *poly);
 void output_coords(polygon *poly);
-void create_polygon(polygon *&adres, int &size, polygon *poly);
-void delete_polygon(polygon *poly, int &size,int del_index);
-void maxMenu(polygon *poly,int size);
-double maxPerimetr(polygon *poly,int size);
-double maxSquare(polygon *poly,int size);
-void PolyOutput(polygon *poly,int size, polygon *adres);
+void create_polygon(polygon *&adres, int &qty, polygon *poly);
+void delete_polygon(polygon *poly, int &qty,int del_index);
+void maxMenu(polygon *poly,int qty);
+double maxPerimetr(polygon *poly,int qty);
+double maxSquare(polygon *poly,int qty);
+void PolyOutput(polygon *poly,int qty, polygon *adres);
 int main()
 {
     clean();
-    int size=0;//изначальный размер массива структур
+    int qty=0;//изначальный размер массива структур
     polygon *  adres = nullptr;
     polygon poly;
     int flag=1;
@@ -77,13 +77,13 @@ int main()
           poly.square=count_square(&poly);
           cout<<"input coords x and y: ";
           cin>>poly.coords->x>>poly.coords->y;
-          create_polygon(adres,size,&poly);
+          create_polygon(adres,qty,&poly);
           clean();
           break;}
         case(2):
           { 
             clean();
-            PolyOutput(&poly,size,adres);
+            PolyOutput(&poly,qty,adres);
             break;
           }
         case(3):
@@ -93,13 +93,12 @@ int main()
             int del_index=0;
             cin>>del_index;
             del_index--;
-            delete_polygon(adres,size,del_index);
-            cout<<"SIZE:"<<size<<"\n";
+            delete_polygon(adres,qty,del_index);
             break;
           }
         case(4):
           {
-            maxMenu(adres,size);
+            maxMenu(adres,qty);
             cin.get();
             break;
           }
@@ -147,7 +146,7 @@ int menu(int var)
   cout<<"3 for deleting polygon\n";
   cout<<"4 for MAX menu\n";
   char choice='0';
-  choice =cin.get();
+  cin>>choice;
   return (int(choice)-48);
     }
 int prove(polygon *poly)
@@ -206,26 +205,25 @@ void output_coords(polygon *poly)
       cout<<poly->coords[j].x<<"\t"<<poly->coords[j].y<<"\n";
     }
 }
-void create_polygon(polygon *&adres, int &size, polygon *poly)
+void create_polygon(polygon *&adres, int &qty, polygon *poly)
 {
-    polygon* tempArray = new polygon[size+1];
-    for (int i = 0; i < size; i++)
+    polygon* tempArray = new polygon[qty+1];
+    for (int i = 0; i < qty; i++)
     {
         tempArray[i] = adres[i];
     }
-    tempArray[size] = *poly;
+    tempArray[qty] = *poly;
     delete[] adres;
     adres = tempArray;
-    size++;
+    qty++;
 }
-void delete_polygon(polygon *adres, int &size,int del_index)
+void delete_polygon(polygon *adres, int &qty,int del_index)
 {
-  cout<<"SIZE:"<<size<<"\n";
-    if (del_index>=0 && del_index<size)
+    if (del_index>=0 && del_index<qty)
     {
-        polygon* newTempArray=new polygon[size-1];
+        polygon* newTempArray=new polygon[qty-1];
         int newIndex=0;
-        for(int i=0; i<size; i=i+1)
+        for(int i=0; i<qty; i=i+1)
         {
             if(i!=del_index)
             {
@@ -235,32 +233,32 @@ void delete_polygon(polygon *adres, int &size,int del_index)
         }
         //delete[] adres;
         adres=newTempArray;
-        size--;
+          qty--;
         cout<<"Polygon deleted\n";
     }
     else{
         cout<<"\nError\tNO SUCH POLYGON\n";
     }
 }
-double maxSquare(polygon *poly,int size){
+double maxSquare(polygon *poly,int qty){
     double maxsquare = 0;
-    for(int i = 0; i < size; i++){
+    for(int i = 0; i < qty; i++){
         if((poly[i].square - maxsquare)>0){
               maxsquare = poly[i].square;
         }
     }
   return maxsquare;
 }
-double maxPerimetr(polygon *poly,int size){
+double maxPerimetr(polygon *poly,int qty){
     double maxperimetr = 0;
-    for(int i = 0; i < size; i++){
+    for(int i = 0; i < qty; i++){
         if((poly[i].square > maxperimetr)>0){
                 maxperimetr = poly[i].square;
         }
     }
   return maxperimetr;
 }
-void maxMenu(polygon *poly,int size)
+void maxMenu(polygon *poly,int qty)
 {
   int choice=0;
   cout<<"\nChoose what you want to find:\n1-MAX PERIMETR\n2-MAX SQUARE\n";
@@ -268,17 +266,17 @@ void maxMenu(polygon *poly,int size)
   clean();
   if(choice==1)
   {
-    cout<<"Max perimetr is "<<maxPerimetr(poly,size);
+    cout<<"Max perimetr is "<<maxPerimetr(poly,qty);
   }
   else if(choice==2)
   {
-    cout<<"Max square is "<<maxSquare(poly,size);
+    cout<<"Max square is "<<maxSquare(poly,qty);
   }
   else{cout<<"\nError, try another number!\n";}
 }
-void PolyOutput(polygon *poly,int size, polygon *adres)
+void PolyOutput(polygon *poly,int qty, polygon *adres)
 {
-  for (int i=0;i<size;i++){
+  for (int i=0;i<qty;i++){
   cout<<"Polygone #"<<i+1<<"\n";
   cout<<"amount of angles: "<<adres[i].amount;
   cout<<"\nlength of side: "<<adres[i].length;
