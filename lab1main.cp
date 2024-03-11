@@ -171,7 +171,7 @@ int prove(polygon *poly)
 }
 void search_coords(polygon *poly)
 {
-  coordinates *coords=new coordinates[NumCoords];
+  coordinates *coords=new coordinates[poly->amount];
   double R=poly->length/(2*sin(M_PI/poly->amount));
   double k=atan2(poly->X,poly->Y);
   double Nx=poly->X-R*cos(k);
@@ -195,7 +195,6 @@ int Prove_Coords(polygon *poly)
   CheckR=sqrt(pow(poly->X,2)+pow(poly->Y,2));
   if(R>CheckR){
       flag=0;
-      cout<<"R= "<<R<<" CheckR= "<<CheckR<<endl;
       cout<<"Uncorrect coords or length of side\n";
   }
   return flag;
