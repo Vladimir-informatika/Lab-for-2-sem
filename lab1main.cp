@@ -14,7 +14,8 @@ struct polygon
     double length;
     double square;
     double perimetr;
-    coordinates *coords=new coordinates[NumCoords];
+    double X;
+    double Y;
 };
 double count_square(polygon *poly);
 double count_perimetr(polygon *poly);
@@ -22,13 +23,11 @@ void clean(int var =1);
 int menu(int var=1);
 int prove(polygon *poly);
 void search_coords(polygon *poly);
-void output_coords(polygon *poly);
 int Prove_Coords(polygon *poly);
 void create_polygon(polygon *&adres, int &qty, polygon *poly);
-void delete_polygon(polygon *poly, int &qty,int del_index);
+void delete_polygon(polygon *&adres, int &qty, int del_index);
 void maxMenu(polygon *poly,int qty);
-double maxPerimetr(polygon *poly,int qty);
-double maxSquare(polygon *poly,int qty);
+double maxParam(polygon *poly,int qty,int choice);
 void PolyOutput(polygon *poly,int qty, polygon *adres);
 int main()
 {
@@ -41,7 +40,7 @@ int main()
     {
       int choice=10;
       choice=menu();
-      if (choice>5){
+      if ((choice>5) || (choice<0)){
         cout<<"\nError, try another number!\n";
       }
       switch(choice)
@@ -77,11 +76,10 @@ int main()
           poly.perimetr=count_perimetr(&poly);
           poly.square=count_square(&poly);
           cout<<"input coords x and y: ";
-          cin>>poly.coords->x>>poly.coords->y;
-          //search_coords(&poly);
-          /*if (Prove_Coords(&poly)==0){
+          cin>>poly.X>>poly.Y;
+          if (Prove_Coords(&poly)==0){
             break;
-          }*/
+          }
           create_polygon(adres,qty,&poly);
           clean();
           break;}
@@ -173,102 +171,113 @@ int prove(polygon *poly)
 }
 void search_coords(polygon *poly)
 {
+  coordinates *coords=new coordinates[NumCoords];
   double R=poly->length/(2*sin(M_PI/poly->amount));
-  double k=atan2(poly->coords[0].x,poly->coords[0].y);
-  double Nx=poly->coords[0].x-R*cos(k);
-  double Ny=poly->coords[0].y-R*sin(k);
+  double k=atan2(poly->X,poly->Y);
+  double Nx=poly->X-R*cos(k);
+  double Ny=poly->Y-R*sin(k);
   for(int i=1;i<poly->amount;i++){
      double angle= 2*M_PI*i/poly->amount;
-     poly->coords[i].x=Nx+R*cos(k+angle);
-     poly->coords[i].y=Ny+R*sin(k+angle);
+     coords[i].x=Nx+R*cos(k+angle);
+     coords[i].y=Ny+R*sin(k+angle);
+  }
+  cout<<poly->X<<"\t"<<poly->Y<<"\n";
+  for (int j=1; j<poly->amount; j=j+1)
+  {
+    cout<<coords[j].x<<"\t"<<coords[j].y<<"\n";
   }
 }
-/*int Prove_Coords(polygon *poly)
+int Prove_Coords(polygon *poly)
 {
   int flag=1;
   double R=poly->length/(2*sin(M_PI/poly->amount));
   double CheckR=0;
-  CheckR=sqrt(pow(poly->coords[0].x,2)+pow(poly->coords[0].y,2));
+  CheckR=sqrt(pow(poly->X,2)+pow(poly->Y,2));
   if(R>CheckR){
       flag=0;
       cout<<"R= "<<R<<" CheckR= "<<CheckR<<endl;
       cout<<"Uncorrect coords or length of side\n";
   }
   return flag;
-}*/
-void output_coords(polygon *adres)
-{
-  for (int j=0; j<adres->amount; j=j+1)
-    {
-      cout<<adres->coords[j].x<<"\t"<<adres->coords[j].y<<"\n";
-    }
 }
 void create_polygon(polygon *&adres, int &qty, polygon *poly)
 {
-    polygon* tempArray = new polygon[qty+1];
-    for (int i = 0; i < qty; i++)
-    {
-        tempArray[i] = adres[i];
+    polygon* tempArray;
+    if (adres != nullptr) {
+        tempArray = new polygon[qty + 1];
+        for (int i = 0; i < qty; i++) {
+            tempArray[i] = adres[i];
+        }
+        delete[] adres;
+    } else {
+        tempArray = new polygon[1];
     }
+
     tempArray[qty] = *poly;
-    delete[] adres;
     adres = tempArray;
     qty++;
 }
-void delete_polygon(polygon *adres, int &qty,int del_index)
+void delete_polygon(polygon *&adres, int &qty, int del_index)
 {
-    if (del_index>=0 && del_index<qty)
+    if (del_index >= 0 && del_index < qty)
     {
-        polygon* newTempArray=new polygon[qty-1];
-        int newIndex=0;
-        for(int i=0; i<qty; i=i+1)
+        polygon* newTempArray = new polygon[qty - 1];
+        int newIndex = 0;
+        for (int i = 0; i < qty; i++)
         {
-            if(i!=del_index)
+            if (i != del_index)
             {
-                newTempArray[newIndex]=adres[i];
+                newTempArray[newIndex] = adres[i];
                 newIndex++;
             }
         }
-        //delete[] adres;
-        adres=newTempArray;
+
+        delete[] adres; 
+        adres = newTempArray;
         qty--;
-        cout<<"Polygon deleted\n";
+        cout << "Polygon deleted\n";
     }
-    else{
-        cout<<"\nError\tNO SUCH POLYGON\n";
+    else {
+        cout << "\nError\tNO SUCH POLYGON\n";
     }
 }
-double maxSquare(polygon *poly,int qty){
-    double maxsquare = 0;
+double maxParam(polygon *poly,int qty,int choice){
+    double maxparam = 0;
+    if (choice==1){
     for(int i = 0; i < qty; i++){
-        if((poly[i].square - maxsquare)>0){
-              maxsquare = poly[i].square;
+        if((poly[i].perimetr - maxparam)>0){
+                  maxparam = poly[i].perimetr;
         }
     }
-  return maxsquare;
-}
-double maxPerimetr(polygon *poly,int qty){
-    double maxperimetr = 0;
-    for(int i = 0; i < qty; i++){
-        if((poly[i].perimetr - maxperimetr)>0){
-                maxperimetr = poly[i].perimetr;
-        }
     }
-  return maxperimetr;
+    else if(choice==2)
+    {
+      for(int i = 0; i < qty; i++){
+      if((poly[i].square - maxparam)>0){
+            maxparam = poly[i].square;
+      }
+    }
+    }
+  return maxparam;
 }
 void maxMenu(polygon *poly,int qty)
 {
+  clean();
   int choice=0;
-  cout<<"\nChoose what you want to find:\n1-MAX PERIMETR\n2-MAX SQUARE\n";
+  cout<<"\nChoose what you want to find:\n1-MAX PERIMETR\n2-MAX SQUARE\n3-Exit max menu\n";
   cin>>choice;
   clean();
   if(choice==1)
   {
-    cout<<"Max perimetr is "<<maxPerimetr(poly,qty);
+    cout<<"Max perimetr is "<<maxParam(poly,qty,choice)<<"\n";
   }
   else if(choice==2)
   {
-    cout<<"Max square is "<<maxSquare(poly,qty);
+    cout<<"Max square is "<<maxParam(poly,qty,choice)<<"\n";
+  }
+  else if (choice==3)
+  {
+    clean();
   }
   else{cout<<"\nError, try another number!\n";}
 }
@@ -281,7 +290,6 @@ void PolyOutput(polygon *poly,int qty, polygon *adres)
   cout<<"\nPerimrtr: "<<adres[i].perimetr;
   cout<<"\nSquare: "<<adres[i].square<<"\n";
   search_coords(&adres[i]);
-  output_coords(&adres[i]);
   }
   cin.get();
 }
