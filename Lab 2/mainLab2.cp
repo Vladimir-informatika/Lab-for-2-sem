@@ -8,11 +8,11 @@ class vehicle
  double TankCapacity;//обЪём бака
  double speed;
  double engIntake;//потребление двигателя
+ double engPow;//мощность двигателя
+ int Nwheels;
  public:///////////////////////////////////////////////////////
  double mileage;//пробег
  double NRefuel;//количесвто дозаправок
- int Nwheels;
- double engPow;//мощность двигателя
  string name;
  double Time;//время пути
  inline double calculateSpeed(){return sqrt(engPow)*(70/Nwheels-2.5);}
@@ -37,7 +37,7 @@ class vehicle
 }
 void output()
 {
-  cout<<"Number of wheels: "<<Nwheels<<";\t"<<"power of engine: "<<engPow<<"HP;\t"<<"speed: "<<speed<<"km/h;\t"<<"Engine intake: "<<engIntake<<"l/100km;\t"<<"mileage: "<<mileage<<"km;"<<endl;
+  cout<<"Number of wheels: "<<Nwheels<<";\t"<<"power of engine: "<<engPow<<" HP;\t"<<"speed: "<<speed<<" km/h;\t"<<"Engine intake: "<<engIntake<<" l/100km;\t"<<"mileage: "<<mileage<<" km;"<<endl;
 }
 void inputVeh()
 {
