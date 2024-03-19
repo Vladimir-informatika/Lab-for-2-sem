@@ -27,7 +27,7 @@ int Prove_Coords(polygon *poly);
 void create_polygon(polygon *&adres, int &qty, polygon *poly);
 void delete_polygon(polygon *&adres, int &qty, int del_index);
 void maxMenu(polygon *poly,int qty);
-double maxParam(polygon *poly,int qty,int choice);
+double maxParam(polygon *poly,int qty,int choice, int *&IndArr,int &index);
 void PolyOutput(polygon *poly,int qty, polygon *adres);
 int main()
 {
@@ -240,46 +240,63 @@ void delete_polygon(polygon *&adres, int &qty, int del_index)
         cout << "\nError\tNO SUCH POLYGON\n";
     }
 }
-double maxParam(polygon *poly,int qty,int choice){
+double maxParam(polygon *poly,int qty,int choice, int *&IndArr,int &index){
     double maxparam = 0;
+    index=0;
     if (choice==1){
     for(int i = 0; i < qty; i++){
-        if((poly[i].perimetr - maxparam)>0){
+        if((poly[i].perimetr - maxparam)>=0){
                   maxparam = poly[i].perimetr;
+                  IndArr[index]=i;
+                  index++;      
         }
     }
     }
     else if(choice==2)
     {
       for(int i = 0; i < qty; i++){
-      if((poly[i].square - maxparam)>0){
+      if((poly[i].square - maxparam)>=0){
             maxparam = poly[i].square;
+            IndArr[index]=i;
+            index++;
       }
     }
     }
   return maxparam;
 }
-void maxMenu(polygon *poly,int qty)
-{
-  clean();
-  int choice=0;
-  cout<<"\nChoose what you want to find:\n1-MAX PERIMETR\n2-MAX SQUARE\n3-Exit max menu\n";
-  cin>>choice;
-  clean();
-  if(choice==1)
-  {
-    cout<<"Max perimetr is "<<maxParam(poly,qty,choice)<<"\n";
-  }
-  else if(choice==2)
-  {
-    cout<<"Max square is "<<maxParam(poly,qty,choice)<<"\n";
-  }
-  else if (choice==3)
-  {
+void maxMenu(polygon *poly, int qty) {
     clean();
-  }
-  else{cout<<"\nError, try another number!\n";}
+    int choice = 0;
+    int *IndArr = new int[qty];
+    int index = 0;
+
+    cout << "\nChoose what you want to find:\n1-MAX PERIMETER\n2-MAX SQUARE\n3-Exit max menu\n";
+    cin >> choice;
+    clean();
+
+    if (choice == 1) {
+        cout << "Max perimeter is " << maxParam(poly, qty, choice, IndArr, index) << "\n";
+        if (index > 0) {
+            for (int i = 0; i < index; i++) {
+                cout << "Index of polygon: #" << IndArr[i] + 1 << "\n";
+            }
+        }
+    } else if (choice == 2) {
+        cout << "Max square is " << maxParam(poly, qty, choice, IndArr, index) << "\n";
+        if (index > 0) {
+            for (int i = 0; i < index; i++) {
+                cout << "Index of polygon: #" << IndArr[i] + 1 << "\n";
+            }
+        }
+    } else if (choice == 3) {
+        clean();
+    } else {
+        cout << "\nError, try another number!\n";
+    }
+
+    delete[] IndArr;
 }
+
 void PolyOutput(polygon *poly,int qty, polygon *adres)
 {
   for (int i=0;i<qty;i++){
