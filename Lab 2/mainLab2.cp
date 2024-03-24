@@ -1,70 +1,45 @@
 #include <iostream>
 #include "cmath"
 #include <string>
+#include <limits>
 using namespace std;
 class vehicle
 {
  private:
- double TankCapacity;//обЪём бака
- double speed;
- double engIntake;//потребление двигателя
- double engPow;//мощность двигателя
+ double TankCapacity;//обЪём бака литры l
+ double speed; //скорость км/ч km/h
+ double engIntake;//потребление двигателя литров/км l/km
+ double engPow;//мощность двигателя HP horsepower
  int Nwheels;
  public:///////////////////////////////////////////////////////
- double mileage;//пробег
+ double mileage;//пробег km
  double NRefuel;//количесвто дозаправок
  string name;
- double Time;//время пути
+ double Time;//время пути hour
  inline double calculateSpeed(){return sqrt(engPow)*(70/Nwheels-2.5);}
  inline double calculateIntake(){return pow(engPow,1/3)+sqrt(engPow)-6.25;}
- inline double calculateRefuel(){return ((mileage*(engIntake/100))/TankCapacity);};
+ inline double calculateRefuel(double raceLength){return ((raceLength*(engIntake/100))/TankCapacity);};
  inline double calculateRaceTime(double raceLength){return (raceLength/speed);};
- vehicle ()
+vehicle(){name= "add vehicle";mileage=0;Time=0;NRefuel=0;}
+void setTankCapacity(double tank) {TankCapacity = tank;}
+void setEnginePower(double power) {engPow = power;}
+void setName(string vehicle_name) {name = vehicle_name;}
+void setNwheels(int wheels){Nwheels = wheels;}
+vehicle (string name, double TankCapacity, double engPow, int Nwheels) 
 {
-  name="";
-  Nwheels=0;
-  engPow=0;
-  mileage=0;
-  TankCapacity=0;
-  Time=0;
-  speed=0;
-  engIntake=0;
-  NRefuel=0;
+  this->inputVeh(name,TankCapacity, engPow, Nwheels);
 }
-~vehicle()
-{
-  cout<<"Destruction of "<<name<<endl;
-}
-void output()
-{
-  cout<<"Number of wheels: "<<Nwheels<<";\t"<<"power of engine: "<<engPow<<" HP;\t"<<"speed: "<<speed<<" km/h;\t"<<"Engine intake: "<<engIntake<<" l/100km;\t"<<"mileage: "<<mileage<<" km;"<<endl;
-}
-void inputVeh()
-{
-  cout<<"\nName of the car: ";
-  //getline(cin,name);
-  cin>>name;
-  cout<<"Number of wheels: ";
-  cin>>Nwheels;
-  while ((Nwheels<2)|| (Nwheels>8) || (Nwheels==5) || (Nwheels==7))
-    {cout<<"Uncorrect number of wheels, try again\n";cin>>Nwheels; }
-  cout<<"Power of the engine (HP): ";//horse power?
-  cin>>engPow;
-  while (engPow<0)
-    {cout<<"Uncorrect, try again\n";cin>>engPow; };
-  cout<<"Tank capacity (l): ";
-  cin>>TankCapacity;
-  while (TankCapacity<0)
-    {cout<<"Uncorrect, try again\n";cin>>TankCapacity; };
-  speed=calculateSpeed();
-  engIntake=calculateIntake();
-}
+~vehicle(){cout<<"Destruction of "<<name<<endl;}
+void output();
+void inputVeh(string name,double TankCapaciy, double engPow, int Nwheels);
 };
 int menu(int &flag);
 void clean(int var =1);
 void create_vehicle(vehicle *&adres,int &qty, vehicle cars);
 vehicle* RatingResults(vehicle *&adres, int qty);
 void outputResults(vehicle *&adres, int qty);
+double InputProve(double var);
+int InputProve(int var);
 /////////////////////////////////MAIN/////////////////////////
 int main()
 {
@@ -104,7 +79,9 @@ int main()
           case(1):
             {
             clean();
-            cars.inputVeh();
+            string vehicle_name=""; double tank=0;
+            double power=0; int Nwheels=0;
+            cars.inputVeh(vehicle_name,tank,power,Nwheels);
             clean();
             create_vehicle(adres,qty, cars);
             break;}
@@ -122,7 +99,7 @@ int main()
             {
               clean();
               cout<<"Enter the length of the track (km): ";
-              cin>>trackLen;
+              trackLen=InputProve(trackLen);
               rez=0;
               break;
             }
@@ -138,8 +115,8 @@ int main()
                 for (int i=0;i<qty;i++)
                   {
                     adres[i].Time=adres[i].calculateRaceTime(trackLen);
-                    adres[i].mileage=(adres[i].mileage)+trackLen;
-                    adres[i].NRefuel=adres[i].calculateRefuel();
+                    adres[i].mileage=trackLen;
+                    adres[i].NRefuel=adres[i].calculateRefuel(trackLen);
                   }
               }
               break;
@@ -159,7 +136,7 @@ int main()
 
 void clean(int var)
 {
-    for(int i=0; i<100; i=i+1)
+    for(int i=0; i<5; i=i+1)
     {
         cout<<"\n";
     }
@@ -173,14 +150,14 @@ int menu(int &rez)
   cout<<"3 to enter length of the track\n";
   cout<<"4 for route calculation\n";//расчет прохождения трассы
   if (rez==1)
-    cout<<"5 for results of race\n";
-  char choice='0';
-  cin>>choice;
-  if ((int(choice)-48)==4)
+    cout<<"5 for results of last race\n";
+  int choice=0;
+  choice=InputProve(choice);
+  if (choice==4)
   {
     rez=1;
   }
-  return (int(choice)-48);
+  return choice;
 }
 void create_vehicle(vehicle *&adres,int &qty, vehicle cars)
 {
@@ -204,19 +181,24 @@ void create_vehicle(vehicle *&adres,int &qty, vehicle cars)
 vehicle* RatingResults(vehicle *&adres, int qty)
 {
   vehicle *results = new vehicle[qty];
-  int resultIndex = 0;
+  vehicle *rez_copy=new vehicle[1];
+  for (int i=0;i<qty;i++)
+    {
+      results[i]=adres[i];
+    }
   for (int i = 0; i < qty; i++)
   {
     for (int j = 0; j < qty; j++)
     {
-      if ((adres[i].Time - adres[j].Time <= 0) && (adres[i].NRefuel - adres[j].NRefuel <= 0))
+      if ((results[i].Time - results[j].Time < 0) && (results[i].NRefuel - results[i].NRefuel <= 0)) 
       {
-        results[resultIndex] = adres[i];
-        resultIndex++;
-        break;
+        rez_copy[0]=results[i];
+        results[i] = results[j];
+        results[j]=rez_copy[0];
       }
     }
   }
+  delete[] rez_copy;
   return results;
 }
 void outputResults(vehicle *&adres, int qty)
@@ -229,4 +211,56 @@ void outputResults(vehicle *&adres, int qty)
       cout<<"Refuel times: "<<int(ceil(results[i].NRefuel))<<endl; 
     }
   delete[] results;
+}
+void vehicle::output()
+{
+   cout<<"Number of wheels: "<<Nwheels<<";\n"<<"power of engine: "<<engPow<<" HP;\n"<<"speed: "<<speed<<" km/h;\n"<<"Engine intake: "<<engIntake<<" l/100km;\n"<<"mileage: "<<mileage<<" km;"<<endl;
+}
+void vehicle :: inputVeh(string vehicle_name,double tank, double power, int wheels)
+{
+  cout<<"\nName of the car: ";
+  cin>>vehicle_name;
+  setName(vehicle_name);
+  cout<<"Number of wheels: ";
+  wheels=InputProve(wheels);
+  while((wheels<2)|| (wheels>8) || (wheels==5) || (wheels==7))
+    {
+      cout<<"Uncorrect number of wheels!try again:"<<endl;
+      cin>>wheels;
+    }
+  setNwheels(wheels);
+  cout<<"Power of the engine (HP): ";//horse power
+  power=InputProve(power);
+  setEnginePower(power);
+  cout<<"Tank capacity (l): ";
+  tank=InputProve(tank);
+  setTankCapacity(tank);
+  speed = calculateSpeed();
+  engIntake = calculateIntake();
+}
+double InputProve(double var)
+{
+  cin>>var;
+  if(cin.fail() || var<=0){
+  while (!(cin >> var) || var<=0)
+    {
+      cout<<"Uncorrect, try again\n";
+      cin.clear(); 
+      cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+    }
+  }
+  return var;
+}
+int InputProve(int var)
+{
+  cin>>var;
+  if (cin.fail() || var<0){
+  while (!(cin >> var) || var<0)
+    {
+      cout<<"Uncorrect, try again\n";
+      cin.clear(); 
+      cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
+    }
+  }
+  return var;
 }
