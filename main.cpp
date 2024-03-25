@@ -11,8 +11,8 @@ struct regular_polygon {
     double length;
     double square;
     double perimeter;
-    double* x = new double[count_sides];
-    double* y = new double[count_sides];
+    double *x = new double[count_sides];
+    double *y = new double[count_sides];
 };
 
 void CountSquare(struct regular_polygon* reg_pol, int amount);
@@ -111,7 +111,7 @@ int* AddOutput(int amount, int* output)
 void SetData(regular_polygon* reg_pol, int amount, int* output)
 {
     cout << "Enter count of sides:" << '\n';
-    cin >> reg_pol[amount].count_sides;
+    cin >> reg_pol[amount-1].count_sides;
     bool flag = false;
     if (reg_pol[amount].count_sides > 2) flag = true;
     while (flag == false)
@@ -136,24 +136,24 @@ void SetData(regular_polygon* reg_pol, int amount, int* output)
     cout << "Enter vertex coordinates" << '\n';
 
     cout << "Enter x:" << '\n';
-    cin >> reg_pol[amount].x[0];
+    cin >> reg_pol[amount - 1].x[ 0];   /// ТУТ ОШИБКА
 
     cout << "Enter y:" << endl;
-    cin >> reg_pol[amount].y[0];
+    cin >> reg_pol[amount - 1].y[ 0];
     coordinates(reg_pol, amount);
 }
-
+////////////   regpol several, not one
 int* max_square(regular_polygon* reg_pol, int amount)
 {
     int i_max = 0;
     int* square_max = new int[amount];
     for (int i = 1; i < amount; i++)
     {
-        if (reg_pol[i].square > reg_pol[i_max].square) i_max = i;
+        if ((reg_pol[i].square - reg_pol[i_max].square) > 0) i_max = i;
     }
     for (int i = i_max; i < amount; i++)
     {
-        if (reg_pol[i].square == reg_pol[i_max].square) square_max[i] = i;
+        if ((reg_pol[i].square - reg_pol[i_max].square) == 0) square_max[i] = i;
         else square_max[i] = 0;
     }
     return square_max;
@@ -165,16 +165,17 @@ int* max_perimeter(regular_polygon* reg_pol, int amount)
     int* perimeter_max = new int[amount];
     for (int i = 1; i < amount; i++)
     {
-        if (reg_pol[i].perimeter > reg_pol[i_max].perimeter) i_max = i;
+        if ((reg_pol[i].perimeter - reg_pol[i_max].perimeter) > 0) i_max = i;
     }
     for (int i = i_max; i < amount; i++)
     {
-        if (reg_pol[i].perimeter == reg_pol[i_max].perimeter) perimeter_max[i] = i;
+        if ((reg_pol[i].perimeter - reg_pol[i_max].perimeter) == 0) perimeter_max[i] = i;
         else perimeter_max[i] = 0;
     }
     return perimeter_max;
 }
 
+///Создаем массив флажков который говорит показывать или нет
 int* del_struct(int* output, int choosenForDelete)
 {
     if (choosenForDelete == 0)
@@ -185,6 +186,7 @@ int* del_struct(int* output, int choosenForDelete)
 }
 /////// ОГРАНИЧЕНИЯ///////
 
+/////////////// МЕНЮ////////////////
 
 void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 {
@@ -232,6 +234,7 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
         break;
     case 5:
         check(OurPolygon, PolygonAmount, output);
+        return;
         break;
     default:
         cout << "Incorrect! Try again" << '\n';
@@ -241,6 +244,7 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     return;
 }
 
+/// В Ы В О Д
 void print(regular_polygon* reg_pol, int amount, int* output)
 {
     for (int i = 0; i < amount; i++)
@@ -264,6 +268,7 @@ void print(regular_polygon* reg_pol, int amount, int* output)
     }
 }
 
+/// УДОСТОВЕРЕМСЯ ВЫХОДИТЬ ИЛИ НЕТ
 void check(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 {
     cout << "Are you sure that you want to quit? (1 - yes; 0 - no)" << '\n';
@@ -285,6 +290,8 @@ void check(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     return;
 }
 
+
+///ПОДМЕНЮШКА
 void submenu(regular_polygon* OurPolygon, int PolygonAmount)
 {
     int k;
@@ -325,6 +332,9 @@ void submenu(regular_polygon* OurPolygon, int PolygonAmount)
     return;
 }
 
+
+
+/// СЧИТАЕМ КООРДИНАТЫ
 void coordinates(struct regular_polygon* reg_pol, int amount)
 {
     double Radius = reg_pol[amount].length / (2 * sin(M_PI / (reg_pol[amount].count_sides)));
@@ -334,14 +344,11 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     double Ry = Radius*sin(phi);
     double O_x = reg_pol[amount].x[0] - Rx;
     double O_y = reg_pol[amount].y[0] - Ry;
-    double* gamma = new double[reg_pol[amount].count_sides];
-    gamma[0] = phi;
     for (int i = 1; i < reg_pol[amount].count_sides; i++)
     {
-        reg_pol[amount].x[i] = Rx + Radius * cos(gamma[i - 1] + alpha);
-        reg_pol[amount].y[i] = Ry + Radius * sin(gamma[i - 1] + alpha);
+        reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
+        reg_pol[amount].y[i] = O_y + Radius * sin(phi + i * alpha);
     }
-    delete [] gamma;
     return;
 }
 // Quit the programm
