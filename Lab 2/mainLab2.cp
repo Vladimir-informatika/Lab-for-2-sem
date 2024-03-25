@@ -63,7 +63,7 @@ int main()
           {
             cout<<"Are you sure you want to exit?\n1-yes\n0-go back\n";
             int exit=2;
-            cin>> exit;
+            exit=InputProve(exit);
             if(exit==1)
             {
               flag=0;
