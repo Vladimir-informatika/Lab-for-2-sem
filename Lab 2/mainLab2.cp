@@ -16,8 +16,8 @@ class vehicle
  double NRefuel;//количесвто дозаправок
  string name;
  double Time;//время пути hour
- inline double calculateSpeed(){return sqrt(engPow)*(70/Nwheels-2.5);}
- inline double calculateIntake(){return pow(engPow,1/3)+sqrt(engPow)-6.25;}
+ inline double calculateSpeed(){return fabs(sqrt(engPow)*(70/Nwheels-2.5));}
+ inline double calculateIntake(){return fabs(pow(engPow,1/3)+sqrt(engPow)-6.25);}
  inline double calculateRefuel(double raceLength){return ((raceLength*(engIntake/100))/TankCapacity);};
  inline double calculateRaceTime(double raceLength){return (raceLength/speed);};
 vehicle(){name= "add vehicle";mileage=0;Time=0;NRefuel=0;}
@@ -223,7 +223,7 @@ void vehicle :: inputVeh(string vehicle_name,double tank, double power, int whee
   setName(vehicle_name);
   cout<<"Number of wheels: ";
   wheels=InputProve(wheels);
-  while((wheels<2)|| (wheels>8) || (wheels==5) || (wheels==7))
+  while((wheels<2) || (wheels==5) || (wheels==7))
     {
       cout<<"Uncorrect number of wheels!try again:"<<endl;
       cin>>wheels;
