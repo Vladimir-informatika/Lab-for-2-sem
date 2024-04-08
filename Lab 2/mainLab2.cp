@@ -38,13 +38,13 @@ public:///////////////////////////////////////////////////////
   vehicle(string vehicle_name, double tank, double power, int wheels) {
     mileage = Time = NRefuel = 0;
     cout << "\nName of the car: ";
-    cin >> vehicle_name;
+    cin>>vehicle_name;
     setName(vehicle_name);
     cout << "Number of wheels: ";
     wheels = InputProve(wheels);
     while ((wheels < 2) || (wheels == 5) || (wheels == 7)) {
       cout << "Uncorrect number of wheels! try again:" << endl;
-      cin >> wheels;
+      wheels = InputProve(wheels);
     }
     setNwheels(wheels);
     cout << "Power of the engine (HP): "; // horse power
