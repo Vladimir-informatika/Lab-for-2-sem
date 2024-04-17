@@ -20,13 +20,17 @@ public:///////////////////////////////////////////////////////
   string name;
   double Time; //время пути hour
   inline double calculateSpeed() {
-    return fabs(sqrt(engPow) * (70 / Nwheels - 2.5));
+    return fabs(sqrt(engPow) * ((70 / double(Nwheels)) - 2.5));
   }
   inline double calculateIntake() {
     return fabs(pow(engPow, 1 / 3) + sqrt(engPow) - 6.25);
   }
-  inline double calculateRefuel(double raceLength) {
-    return ((raceLength * (engIntake / 100)) / TankCapacity);
+  double calculateRefuel(double raceLength) {
+    double Nrefuel=(raceLength * (engIntake / 100)) / TankCapacity;
+    if(Nrefuel>1)
+      return ceil(Nrefuel);
+    else
+     return floor(Nrefuel);
   };
   inline double calculateRaceTime(double raceLength) {
     return (raceLength / speed);
