@@ -7,14 +7,14 @@ int qty = 0; //изначальный размер массива
 double InputProve(double var);
 int InputProve(int var);
 class wheel{
-  int status;//повреждено/неповреждено 1/0
   double current_mileage;
 public:
-  int check_status();//ПЕРЕДЕЛАТЬ! Вроде норм
+  int status;//повреждено/неповреждено 1/0
+  int check_status();// Вроде норм
   wheel(){status=0;current_mileage=0;};
   wheel(double mileage)
  {
-   current_mileage=mileage;
+   current_mileage+=mileage;
    status=check_status();
  }
   virtual void output()
@@ -28,9 +28,10 @@ public:
 };
 class engine
 {
+double engPow; //мощность двигателя HP horsepower
 public:
   double engIntake; //потребление двигателя литров/км l/km
-  double engPow; //мощность двигателя HP horsepower
+  //double engPow; //мощность двигателя HP horsepower
  inline double calculateIntake() {return fabs(pow(engPow, 1 / 3) + sqrt(engPow) - 6.25);}
  engine(){engIntake=0;engPow=0;};
  engine(double power)
@@ -50,25 +51,35 @@ class fuel_system
 public:
   double TankCapacity; //обЪём бака литры l
   double current_fuel; //текущий обЪём топлива литры l;
-  //double calculate_cur_fuel() {};//расчёт текущего обЪёма топлива
+  double calculate_cur_fuel(double engIntake,double mileage) {//расчёт текущего обЪёма топлива
+    if (engIntake * mileage<=TankCapacity)
+    return double (TankCapacity - (engIntake * mileage));
+    else 
+    {
+      return 0;
+    }
+  };
   fuel_system(){TankCapacity=0;current_fuel=0;};
-  fuel_system(double capacity)
+  void def_fuel_system(double capacity, double engIntake,double mileage )
  {
+   cout<<"fuel capacity: ";
    cin>>capacity;;
    TankCapacity=capacity;
+   current_fuel=capacity;
  }
  virtual void output()
 {
   cout<<"fuel capacity: "<<TankCapacity<<endl;
-  //cout<<"current fuel: "<<current_fuel<<endl;
+  cout<<"current fuel: "<<current_fuel<<endl;
 }
 };
-class vehicle : public engine, fuel_system {
+class vehicle : public engine, public fuel_system {
 private:
   double speed;        //скорость км/ч km/h
   int Nwheels;
 public:///////////////////////////////////////////////////////
   wheel* ptr_wheel;
+  int damaged_wheels=0;
   double mileage; //пробег km
   string name;
   double Time; //время пути hour
@@ -97,11 +108,22 @@ public:///////////////////////////////////////////////////////
     for (int i = 0; i < wheels; i++) {
         ptr_wheel[i] = wheel();
     }
+    def_fuel_system(0, engIntake,mileage);
   }
   void setName(string vehicle_name) {name = vehicle_name;}
   void setNwheels(int wheels){Nwheels = wheels;}
   ~vehicle() { cout << "Destruction of " << name << endl;} 
   int getNwheels() { return Nwheels; } 
+  int number_of_damaged_wheels()
+{
+  int count=0;
+  for (int i = 0; i < Nwheels; i++)
+    {
+      if (ptr_wheel[i].status==1)
+      {count++;}
+    }
+  return count;
+}
   void output();
 };
 int menu(int &flag);
@@ -176,6 +198,8 @@ int main() {
             {
               adres[i].ptr_wheel[j] = wheel(trackLen);
             }
+          adres[i].damaged_wheels = adres[i].number_of_damaged_wheels();
+          adres[i].current_fuel = adres[i].calculate_cur_fuel(adres[i].engIntake, trackLen);
           //adres[i].NRefuel = adres[i].calculateRefuel(trackLen);
         }
       }
@@ -262,13 +286,11 @@ void outputResults(vehicle *&adres, int qty) {
 }
 void vehicle::output() {
   cout << "Number of wheels: " << Nwheels << ";\n"
-       << "power of engine: " << engPow << " HP;\n"
+        <<"Damaged wheels: "<<damaged_wheels<<";\n"
        << "speed: " << speed << " km/h;\n"
-       << "Engine intake: " << engIntake << " l/100km;\n"
        << "mileage: " << mileage << " km;" << endl;
-      for (int i = 0; i < Nwheels; i++) {
-        ptr_wheel[i].output();
-      }
+  engine::output();
+  fuel_system::output();
 }
 double InputProve(double var) {
   cin >> var;
@@ -308,18 +330,15 @@ int wheel::check_status()
         if (current_mileage <= 500) {
             if (damageProb > 70) {
                 return 1;
-            }
+            }}
          else if (current_mileage <= 1000) {
             if (damageProb > 50) {
                 return 1;
-            }
+            }}
          else {
-            if (damageProb > 30) {
+            if (damageProb > 20) {
                 return 1;
             }
-        }
-    }
-  }
-  }
+        }}
     return 0;
   }
