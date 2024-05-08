@@ -7,18 +7,18 @@ int qty = 0; //изначальный размер массива
 double InputProve(double var);
 int InputProve(int var);
 class wheel{
-public:
   int status;//повреждено/неповреждено 1/0
   double current_mileage;
-  int check_status();//ПЕРЕДЕЛАТЬ!
+public:
+  int check_status();//ПЕРЕДЕЛАТЬ! Вроде норм
   wheel(){status=0;current_mileage=0;};
   wheel(double mileage)
  {
+   current_mileage=mileage;
    status=check_status();
  }
   virtual void output()
 {
-  cout<<"status: "<<status<<endl;
   if (status==1)
   {
     cout<<"damaged"<<endl;
@@ -68,17 +68,17 @@ private:
   double speed;        //скорость км/ч km/h
   int Nwheels;
 public:///////////////////////////////////////////////////////
+  wheel* ptr_wheel;
   double mileage; //пробег km
   string name;
   double Time; //время пути hour
   /*inline double calculateSpeed() {
     return fabs(sqrt(engPow) * (70 / Nwheels - 2.5));//сделать функцией от мощности статуса колёс и оставшегося топлива
   };*/
-  wheel wheel_obj;
   vehicle() {
     name="ADDVEHICLE";
     mileage=0;
-    wheel wheel_obj;
+    ptr_wheel=0;
   }
   vehicle(string vehicle_name,int wheels) 
   {
@@ -93,11 +93,15 @@ public:///////////////////////////////////////////////////////
       cin >> wheels;
     }
     setNwheels(wheels);
-    wheel_obj=wheel(mileage);
+    ptr_wheel = new wheel[wheels];
+    for (int i = 0; i < wheels; i++) {
+        ptr_wheel[i] = wheel();
+    }
   }
   void setName(string vehicle_name) {name = vehicle_name;}
   void setNwheels(int wheels){Nwheels = wheels;}
   ~vehicle() { cout << "Destruction of " << name << endl;} 
+  int getNwheels() { return Nwheels; } 
   void output();
 };
 int menu(int &flag);
@@ -168,6 +172,10 @@ int main() {
         for (int i = 0; i < qty; i++) {
           //adres[i].Time = adres[i].calculateRaceTime(trackLen);
           adres[i].mileage = trackLen;
+          for (int j = 0; j < adres[i].getNwheels(); j++)
+            {
+              adres[i].ptr_wheel[j] = wheel(trackLen);
+            }
           //adres[i].NRefuel = adres[i].calculateRefuel(trackLen);
         }
       }
@@ -258,7 +266,9 @@ void vehicle::output() {
        << "speed: " << speed << " km/h;\n"
        << "Engine intake: " << engIntake << " l/100km;\n"
        << "mileage: " << mileage << " km;" << endl;
-       cout << "Wheel status: " << wheel_obj.status;
+      for (int i = 0; i < Nwheels; i++) {
+        ptr_wheel[i].output();
+      }
 }
 double InputProve(double var) {
   cin >> var;
@@ -290,16 +300,26 @@ int InputProve(int var) {
   int seconds = static_cast<int>((cur_time - minutes) * 60);
   cout << "TIME: " << hours << ":" << minutes << ":" << seconds << endl;
 }*/
-int wheel :: check_status()
+int wheel::check_status()
 {
-  int random=rand()%100;
-  int wear_probability = current_mileage/1000;
-  if (random<=wear_probability)
-  {
-    return 1;//повреждено
+    cout << "CHECKING STATUS OF WHEELS..." << endl;
+    if (current_mileage > 100) {
+        int damageProb = rand() % 100 + 1; // Генерируем вероятность повреждения
+        if (current_mileage <= 500) {
+            if (damageProb > 70) {
+                return 1;
+            }
+         else if (current_mileage <= 1000) {
+            if (damageProb > 50) {
+                return 1;
+            }
+         else {
+            if (damageProb > 30) {
+                return 1;
+            }
+        }
+    }
   }
-  else
-  {
-    return 0;//неповреждено
   }
-}
+    return 0;
+  }
