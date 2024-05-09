@@ -13,18 +13,18 @@ struct regular_polygon {
     double *y;
 };
 
-void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount);
+void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount, int* output);
 void SetData(regular_polygon* reg_pol, int amount, int* output);
 regular_polygon* AddStruct(regular_polygon* reg_pol, int amount);
 int* AddOutput(int amount, int* output);
-int* max_square(struct regular_polygon* reg_pol, int amount);
-int* max_perimeter(struct regular_polygon* reg_pol, int amount);
-int max_square_and_per (regular_polygon* reg_pol, int amount);
-int* del_struct(int* output, int choosenForDelete);
+//int* max_square(struct regular_polygon* reg_pol, int amount);
+//int* max_perimeter(struct regular_polygon* reg_pol, int amount);
+//int max_square_and_per (regular_polygon* reg_pol, int amount, int* output);
+//int* del_struct(int* output, int choosenForDelete);
 void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output);
 void print(regular_polygon* OurPolygon, int amount, int* output);
 void check(regular_polygon* OurPolygon, int PolygonAmount, int* output);
-void submenu(regular_polygon* OurPolygon, int PolygonAmount);
+void submenu(regular_polygon* OurPolygon, int PolygonAmount, int* output);
 void coordinates(struct regular_polygon* reg_pol, int amount);
 
 
@@ -243,7 +243,7 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
         }
         break;
     case 4:
-        submenu(OurPolygon, PolygonAmount);
+        submenu(OurPolygon, PolygonAmount, output);
         break;
     case 5:
         check(OurPolygon, PolygonAmount, output);
@@ -313,7 +313,7 @@ void check(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 
 
 ///ПОДМЕНЮШКА
-void submenu(regular_polygon* OurPolygon, int PolygonAmount)
+void submenu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 {
     int k;
     cout << "What are you going to do?" << '\n';
@@ -324,12 +324,12 @@ void submenu(regular_polygon* OurPolygon, int PolygonAmount)
     {
     case 1:
         cout << "Let's look" << endl << "-----------------------" << endl;
-        square_perimeter(k , OurPolygon, PolygonAmount);
+        square_perimeter(k , OurPolygon, PolygonAmount, output);
         cout << "That's all" << '\n';
         break;
     case 2:
         cout << "Let's look" << endl << "-----------------------" << endl;
-        square_perimeter(k , OurPolygon, PolygonAmount);
+        square_perimeter(k , OurPolygon, PolygonAmount, output);
         cout << "That's all" << '\n';
 
         break;
@@ -337,7 +337,7 @@ void submenu(regular_polygon* OurPolygon, int PolygonAmount)
         break;
     default:
         cout << "Incorrect! Try again" << '\n';
-        submenu(OurPolygon, PolygonAmount);
+        submenu(OurPolygon, PolygonAmount, output);
         break;
     }
     return;
@@ -348,23 +348,29 @@ void submenu(regular_polygon* OurPolygon, int PolygonAmount)
 /// СЧИТАЕМ КООРДИНАТЫ
 void coordinates(struct regular_polygon* reg_pol, int amount)
 {
-    double Radius = reg_pol[amount].length / (2 * sin(M_PI / (reg_pol[amount].count_sides)));
-    double alpha = 2 * M_PI / reg_pol[amount].count_sides;
-    double phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
-    double Rx = Radius*cos(phi);
-    double Ry = Radius*sin(phi);
-    double O_x = reg_pol[amount].x[0] - Rx;
-    double O_y = reg_pol[amount].y[0] - Ry;
+    long double Radius = reg_pol[amount].length / (2 * sin(M_PI / (reg_pol[amount].count_sides)));
+    long double alpha = 2 * M_PI / reg_pol[amount].count_sides;
+    long double phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+    long double Rx = Radius*cos(phi);
+    long double Ry = Radius*sin(phi);
+    long double O_x = reg_pol[amount].x[0] - Rx;
+    long double O_y = reg_pol[amount].y[0] - Ry;
 
     for (int i = 1; i < reg_pol[amount].count_sides; i++)
     {
         reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
         reg_pol[amount].y[i] = O_y + Radius * sin(phi + i * alpha);
     }
+    for (int i = 1; i < reg_pol[amount].count_sides; i++)
+    {
+        if ((abs(reg_pol[amount].x[i]) - (int)(abs(reg_pol[amount].x[i])) - 0.6) < 0) reg_pol[amount].x[i] = (int)(abs(reg_pol[amount].x[i]));
+        if ((abs(reg_pol[amount].y[i]) - (int)(abs(reg_pol[amount].y[i])) - 0.6) < 0) reg_pol[amount].y[i] = (int)(abs(reg_pol[amount].y[i]));
+
+    }
 
     return;
 }
-void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount)
+void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount, int* output)
 {
     int i_max = 0;
     if (k == 1)
@@ -375,15 +381,16 @@ void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount)
 
             for (int i = 0; i < amount; i++)
             {
-                if ((reg_pol[i].square - reg_pol[i_max].square) > 0) i_max = i;
+                if (((reg_pol[i].square - reg_pol[i_max].square) > 0) && (output[i] == 1 )) i_max = i;
             }
             for (int i = i_max; i < amount; i++)
             {
-                if ((reg_pol[i].square - reg_pol[i_max].square) == 0)
+                if (((reg_pol[i].square - reg_pol[i_max].square) == 0) && (output[i] == 1 ))
                 {
-                    cout << i + 1 << endl;
+                    cout << i + 1 << '\t';
                 }
             }
+            cout << endl;
         }
     }
     else if (k == 2)
@@ -393,15 +400,16 @@ void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount)
         {
             for (int i = 0; i < amount; i++)
             {
-                if ((reg_pol[i].perimeter - reg_pol[i_max].perimeter) > 0) i_max = i;
+                if (((reg_pol[i].perimeter - reg_pol[i_max].perimeter) > 0) && (output[i] == 1 )) i_max = i;
             }
             for (int i = i_max; i < amount; i++)
             {
-                if ((reg_pol[i].perimeter - reg_pol[i_max].perimeter) == 0)
+                if (((reg_pol[i].perimeter - reg_pol[i_max].perimeter) == 0) && (output[i] == 1 ))
                 {
-                    cout << i + 1 << '\n';
+                    cout << i + 1 << '\t';
                 }
             }
+            cout << endl;
         }
     }
 
