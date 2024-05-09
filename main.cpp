@@ -17,10 +17,6 @@ void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount, int* o
 void SetData(regular_polygon* reg_pol, int amount, int* output);
 regular_polygon* AddStruct(regular_polygon* reg_pol, int amount);
 int* AddOutput(int amount, int* output);
-//int* max_square(struct regular_polygon* reg_pol, int amount);
-//int* max_perimeter(struct regular_polygon* reg_pol, int amount);
-//int max_square_and_per (regular_polygon* reg_pol, int amount, int* output);
-//int* del_struct(int* output, int choosenForDelete);
 void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output);
 void print(regular_polygon* OurPolygon, int amount, int* output);
 void check(regular_polygon* OurPolygon, int PolygonAmount, int* output);
@@ -61,7 +57,6 @@ regular_polygon* AddStruct(regular_polygon* reg_pol, int amount)
         delete[] reg_pol;
 
         reg_pol = temp;
-        //delete[] temp;
     }
     return reg_pol;
 }
@@ -78,7 +73,6 @@ int* AddOutput(int amount, int* output)
         }
         delete[] output;
         output = temp2;
-        //delete[] temp2;
         output[amount] = 1;
     }
     return output;
@@ -153,44 +147,7 @@ void SetData(regular_polygon* reg_pol, int amount, int* output)
 }
 ////////////   regpol several, not one
 
-int max_square_and_per (regular_polygon* reg_pol, int amount)
-{
 
-    //JOIN NEXT 2 IN 1 FUNC
-
-}
-
-
-int* max_square(regular_polygon* reg_pol, int amount)
-{
-    int* square_max = new int[amount];
-
-
-
-
-
-    return square_max;
-}
-
-int* max_perimeter(regular_polygon* reg_pol, int amount)
-{
-    int* perimeter_max = new int[amount];
-
-
-
-
-
-    return perimeter_max;
-}
-
-///Создаем массив флажков который говорит показывать или нет -------------- чзх???
-/*
-int* del_struct(int* output, int choosenForDelete)
-{
-    output[choosenForDelete - 1] = 0;
-    return output;
-}
-*/
 /////// ОГРАНИЧЕНИЯ///////
 
 /////////////// МЕНЮ////////////////
@@ -207,8 +164,11 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     cout << "5 - Close the programm" << '\n';
     cout << '\n' << "Your input: ";
 
-    int choose;
-    cin >> choose;
+    char choice = '0';
+    cin >> choice;
+    int choose = int(choice)-48;
+    //int choose;
+    //cin >> choose;
     cout << '\n';
     switch (choose)
     {
