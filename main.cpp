@@ -310,22 +310,58 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
 {
     long double Radius = reg_pol[amount].length / (2 * sin(M_PI / (reg_pol[amount].count_sides)));
     long double alpha = 2 * M_PI / reg_pol[amount].count_sides;
-    long double phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
-    long double Rx = Radius*cos(phi);
-    long double Ry = Radius*sin(phi);
-    long double O_x = reg_pol[amount].x[0] - Rx;
-    long double O_y = reg_pol[amount].y[0] - Ry;
 
-    for (int i = 1; i < reg_pol[amount].count_sides; i++)
+    if ((reg_pol[amount].x[0] > 0) && (reg_pol[amount].y[0] > 0))
     {
-        reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
-        reg_pol[amount].y[i] = O_y + Radius * sin(phi + i * alpha);
+        long double phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+        long double Rx = Radius*cos(phi);
+        long double Ry = Radius*sin(phi);
+        long double O_x = reg_pol[amount].x[0] - Rx;
+        long double O_y = reg_pol[amount].y[0] - Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
+            reg_pol[amount].y[i] = O_y + Radius * sin(phi + i * alpha);
+        }
     }
-    for (int i = 1; i < reg_pol[amount].count_sides; i++)
+    else if ((reg_pol[amount].x[0] < 0) && (reg_pol[amount].y[0] < 0))
     {
-        if ((abs(reg_pol[amount].x[i]) - (int)(abs(reg_pol[amount].x[i])) - 0.6) < 0) reg_pol[amount].x[i] = (int)(abs(reg_pol[amount].x[i]));
-        if ((abs(reg_pol[amount].y[i]) - (int)(abs(reg_pol[amount].y[i])) - 0.6) < 0) reg_pol[amount].y[i] = (int)(abs(reg_pol[amount].y[i]));
-
+        long double phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+        long double Rx = Radius*cos(phi);
+        long double Ry = Radius*sin(phi);
+        long double O_x = reg_pol[amount].x[0] + Rx;
+        long double O_y = reg_pol[amount].y[0] + Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x - Radius * cos(phi + i * alpha);
+            reg_pol[amount].y[i] = O_y - Radius * sin(phi + i * alpha);
+        }
+    }
+    else if ((reg_pol[amount].x[0] < 0 ) && (reg_pol[amount].y[0] > 0))
+    {
+        long double phi = M_PI/2 + atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+        long double Rx = Radius*cos(phi);
+        long double Ry = Radius*sin(phi);
+        long double O_x = reg_pol[amount].x[0] + Rx;
+        long double O_y = reg_pol[amount].y[0] - Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x - Radius * cos(phi - i * alpha);
+            reg_pol[amount].y[i] = O_y + Radius * sin(phi - i * alpha);
+        }
+    }
+    else if ((reg_pol[amount].x[0] > 0) && (reg_pol[amount].y[0] < 0))
+    {
+        long double phi = M_PI/2 + atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+        long double Rx = Radius*cos(phi);
+        long double Ry = Radius*sin(phi);
+        long double O_x = reg_pol[amount].x[0] - Rx;
+        long double O_y = reg_pol[amount].y[0] + Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x + Radius * cos(phi - i * alpha);
+            reg_pol[amount].y[i] = O_y - Radius * sin(phi - i * alpha);
+        }
     }
 
     return;
