@@ -12,10 +12,11 @@ public:
   int status;//повреждено/неповреждено 1/0
   int check_status();// Вроде норм
   wheel(){status=0;current_mileage=0;};
-  wheel(double mileage)
+  double def_wheel(double mileage)
  {
    current_mileage=mileage;
    status=check_status();
+   return current_mileage;
  }
  virtual void  output();
 };
@@ -35,7 +36,7 @@ class fuel_system
 public:
   double TankCapacity; //обЪём бака литры l
   double current_fuel; //текущий обЪём топлива литры l;
-  double calculate_cur_fuel(double engIntake,double mileage);
+  double calculate_cur_fuel(double engIntake,double mileage,double NRefuel);
   fuel_system(){TankCapacity=0;current_fuel=0;};
   void def_fuel_system(double capacity, double engIntake,double mileage );
  virtual void output();
@@ -135,6 +136,9 @@ int main() {
       break;
     }
       delete[] adres;
+      for (int i = 0; i < qty; i++) {
+          delete[] adres[i].ptr_wheel;
+      }
       break;
     case (1): {
       clean();
@@ -151,7 +155,7 @@ int main() {
       for (int i = 0; i < qty; i++) {
         cout << adres[i].name << endl;
         adres[i].output();
-        cout<<"JKJJKBB"<<endl;
+        cout<<"__OR__"<<endl;
         cout<<adres[i];
       }
       break;
@@ -175,12 +179,12 @@ int main() {
           adres[i].mileage = trackLen;
           for (int j = 0; j < adres[i].getNwheels(); j++)
             {
-              adres[i].ptr_wheel[j] = wheel(trackLen);
+              adres[i].ptr_wheel[j].def_wheel(trackLen);
             }
           adres[i].damaged_wheels = adres[i].number_of_damaged_wheels();
-          adres[i].current_fuel = adres[i].calculate_cur_fuel(adres[i].engIntake, trackLen);
-          //adres[i].speed = adres[i].calculateSpeed();!!!ОТРАБОТАТЬ
           adres[i].NRefuel = adres[i].calculateRefuel(trackLen);
+          adres[i].current_fuel = adres[i].calculate_cur_fuel(adres[i].engIntake, trackLen,adres[i].NRefuel);
+          adres[i].speed = adres[i].calculateSpeed();
         }
       }
       break;
@@ -330,12 +334,14 @@ void engine::def_engine(double power)
    engPow=power;
    engIntake=calculateIntake();
  }
-double fuel_system :: calculate_cur_fuel(double engIntake,double mileage) {//расчёт текущего обЪёма топлива
-  if (engIntake * mileage<=TankCapacity)
-    return double (TankCapacity - (engIntake * mileage));
+double fuel_system :: calculate_cur_fuel(double engIntake,double mileage,double NRefuel) {//расчёт текущего обЪёма топлива
+  if (NRefuel==0)
+  {
+    return double (TankCapacity - ((engIntake/100) * mileage));
+  }
   else 
   {
-    return 0;
+    return (((NRefuel)*TankCapacity) - ((engIntake/100) * mileage));
   }
 }
 void fuel_system :: def_fuel_system(double capacity, double engIntake,double mileage )
