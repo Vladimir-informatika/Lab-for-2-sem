@@ -272,13 +272,14 @@ void check(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 }
 
 
-///ПОДМЕНЮШКА
+///ПОДМЕНЮ
 void submenu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 {
-    int k;
     cout << "What are you going to do?" << '\n';
     cout << "1 - Max Square" << endl << "2 - Max Perimeter"  << endl << "3 - quit" << endl;
-    cin >> k;
+    char choice = '0';
+    cin >> choice;
+    int k = int(choice)-48;
 
     switch (k)
     {
