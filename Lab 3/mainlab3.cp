@@ -2,6 +2,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <ctime>
 using namespace std;
 int qty = 0; //изначальный размер массива
 double InputProve(double var);
@@ -294,24 +295,34 @@ int InputProve(int var) {
 
 int wheel::check_status()
 {
+    srand(time(0));
     //cout << "CHECKING STATUS OF WHEELS..." << endl;
-    if (current_mileage > 100) {
-        int damageProb = rand() % 100 + 1; // Генерируем вероятность повреждения
-        if (current_mileage <= 500) {
-            if (damageProb > 70) {
+      /*int damageProb = rand() % 100 + 1; // Генерируем вероятность повреждения
+      if (current_mileage <= 500) {
+          if (damageProb > 70) {
+              return 1;
+          }}
+      else if (current_mileage <= 1000) {
+          if (damageProb > 50) {
+              return 1;
+          }}
+       else if (damageProb > 30) {
                 return 1;
-            }}
-         else if (current_mileage <= 1000) {
-            if (damageProb > 50) {
-                return 1;
-            }}
-         else {
-            if (damageProb > 30) {
-                return 1;
-            }
         }
-    }
-    return 0;
+return 0;
+ /*
+int damageProb = rand() % int(current_mileage)/100; // Генерируем вероятность повреждения
+double res=(current_mileage/1000.0)*double(damageProb);
+cout<<"!!!!!!!!!!"<<res<<endl;
+cout<<"!!!!!!!!??"<<damageProb<<endl;
+if (res>0.5)
+        {
+            return 1;
+        }
+    else
+        {
+            return 0;
+        }*/
   }
 void wheel :: output()
 {
