@@ -370,6 +370,22 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
 void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount, int* output)
 {
     int i_max = 0;
+    double* sq_per = new double[amount];
+    if (amount == 0)
+    {
+        cout << "There are no polygons" << endl;
+        return;
+    }
+    if (k == 1) for (int i = 0; i < amount; i++) sq_per[i] = reg_pol[i].square;
+    else for (int i = 0; i < amount; i++) sq_per[i] = reg_pol[i].perimeter;
+
+    for (int j = 0; j < amount; j++)
+        if (((sq_per[j] - sq_per[i_max]) > 0) && (output[j] == 1)) i_max = j;
+    for (int p = i_max; p < amount; p++)
+        if (((sq_per[p] - sq_per[i_max]) == 0) && (output[p] == 1)) cout << p+1 << '\t';
+    cout << endl;
+    delete[] sq_per;
+    /*
     if (k == 1)
     {
         if (amount == 0) cout << "there are no polygons" << endl;
@@ -409,5 +425,5 @@ void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount, int* o
             cout << endl;
         }
     }
-
+    */
 }
