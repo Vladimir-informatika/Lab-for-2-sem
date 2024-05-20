@@ -296,7 +296,7 @@ int InputProve(int var) {
 
 int wheel::check_status(double mileage, double speed) {
   double ratio = (1/(mileage*sqrt(speed)));
-  if (ratio>=1)
+  if (ratio>=0.5)
   {
     //cout<< "Wheel is not damaged"<<endl;
     return 0;
