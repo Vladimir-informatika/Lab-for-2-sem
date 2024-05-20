@@ -2,6 +2,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <ctime>
 using namespace std;
 int qty = 0; //изначальный размер массива
 double InputProve(double var);
@@ -10,11 +11,11 @@ class wheel {
   double current_mileage;
   int status; //повреждено/неповреждено 1/0
 public:
-  int check_status(double mileage, double Time); // Вроде норм
+  int check_status(double mileage, double speed); 
   wheel() {status=0;current_mileage=0;};
-  double def_wheel(double mileage, double Time) {
+  double def_wheel(double mileage, double speed) {
     current_mileage = mileage;
-    status = check_status(mileage, Time);
+    status = check_status(mileage,speed);
     return current_mileage;
   }
   virtual void output();
@@ -78,6 +79,7 @@ public:
   };
   double get_Time(){return Time;};
   double get_NRefuel(){return NRefuel;};
+ double get_speed(){return speed;};
   void calculateRefuel(double raceLength);
   void time_display();
   int getNwheels() { return Nwheels; }
@@ -179,7 +181,7 @@ int main() {
           adres[i].calculateRaceTime(trackLen);
           adres[i].setMileage(trackLen);
           for (int j = 0; j < adres[i].getNwheels(); j++) {
-          adres[i].ptr_wheel[j].def_wheel(trackLen, adres[i].get_Time());
+          adres[i].ptr_wheel[j].def_wheel(trackLen,adres[i].get_speed());
           }
           adres[i].number_of_damaged_wheels();
           adres[i].calculateRefuel(trackLen);
@@ -292,22 +294,36 @@ int InputProve(int var) {
   return var;
 }
 
-int wheel::check_status(double mileage, double time) {
-  int ratio = int(mileage / time);
-  //cout<<"TIME"<<time<<endl;
-  //cout<<"Ratio"<<ratio<<endl;
-  int damageProb = (rand() % (ratio+1))+1;
-  //cout<<"DAMAGE"<<damageProb<<endl;
-  // cout << "CHECKING STATUS OF WHEELS..." << endl;
-  if (damageProb > (ratio / 2)) 
+int wheel::check_status(double mileage, double speed) {
+  double ratio = (1/(mileage*sqrt(speed)));
+  if (ratio>=1)
   {
-    return 1;
-  } 
-  else 
-  {
+    //cout<< "Wheel is not damaged"<<endl;
     return 0;
   }
+  else
+  {
+    //cout<<"Wheel is damaged"<<endl;
+    return 1;
+  }
 }
+/*
+  int wheel::check_status(double mileage, double time) {
+    int ratio = int(mileage / time);
+    //cout<<"TIME"<<time<<endl;
+    //cout<<"Ratio"<<ratio<<endl;
+    int damageProb = (rand() % (ratio+1))+1;
+    //cout<<"DAMAGE"<<damageProb<<endl;
+    // cout << "CHECKING STATUS OF WHEELS..." << endl;
+    if (damageProb > (ratio / 2)) 
+    {
+      return 1;
+    } 
+    else 
+    {
+      return 0;
+    }
+  }*/
 void wheel ::output() {
   if (status == 1) {
     cout << "damaged" << endl;
