@@ -8,9 +8,8 @@ double InputProve(double var);
 int InputProve(int var);
 class wheel {
   double current_mileage;
-
-public:
   int status; //повреждено/неповреждено 1/0
+public:
   int check_status(double mileage, double Time); // Вроде норм
   wheel() {status=0;current_mileage=0;};
   double def_wheel(double mileage, double Time) {
@@ -19,22 +18,24 @@ public:
     return current_mileage;
   }
   virtual void output();
+  int get_status() { return status; }
 };
 class engine {
 protected:
   double engPow; //мощность двигателя HP horsepower
-public:
   double engIntake; //потребление двигателя литров/км l/km
+public:
  inline double calculateIntake() {return fabs(pow(engPow, 1 / 3) + sqrt(engPow) - 6.25);}
  engine(){engIntake=0;engPow=0;};
   void def_engine(double power);
   virtual void output();
 };
 class fuel_system {
+protected:
+  double current_fuel; //текущий обЪём топлива литры l;
 public:
   double TankCapacity; //обЪём бака литры l
-  double current_fuel; //текущий обЪём топлива литры l;
-  double calculate_cur_fuel(double engIntake, double mileage, double NRefuel);
+  void calculate_cur_fuel(double engIntake, double mileage, double NRefuel);
   fuel_system(){TankCapacity=0;current_fuel=0;};
   void def_fuel_system(double capacity, double engIntake, double mileage);
   virtual void output();
@@ -42,23 +43,21 @@ public:
 class vehicle : public engine, public fuel_system {
 private:
   int Nwheels;
-
-public:
   double speed; //скорость км/ч km/h
-  wheel *ptr_wheel;
+  double Time;    //время пути hour
   int damaged_wheels = 0;
   double mileage; //пробег km
-  string name;
-  double Time;    //время пути hour
   double NRefuel; //количесвто дозаправок
-  double calculateSpeed();
+public:
+  wheel *ptr_wheel;
+  string name;
   vehicle() {
     name = "ADDVEHICLE";
-    Time = mileage = NRefuel = 0;
+    Time = mileage = NRefuel = damaged_wheels = 0;
     ptr_wheel = 0;
   }
   vehicle(string vehicle_name, int wheels) {
-    mileage = 0;
+    mileage =damaged_wheels = 0; 
     setName(vehicle_name);
     setNwheels(wheels);
     ptr_wheel = new wheel[wheels];
@@ -67,20 +66,25 @@ public:
     }
     def_fuel_system(0, engIntake, mileage);
     def_engine(0);
-    speed = calculateSpeed();
+    calculateSpeed();
   }
+  void calculateSpeed();
   void setName(string vehicle_name) { name = vehicle_name; }
   void setNwheels(int wheels) { Nwheels = wheels; }
+  void setMileage(double tracklen) { mileage=tracklen; }
   ~vehicle() { cout << "Destruction of " << name << endl; }
-  inline double calculateRaceTime(double raceLength) {
-    return (raceLength / speed);
+  inline void calculateRaceTime(double raceLength) {
+    Time = (raceLength / speed);
   };
-  double calculateRefuel(double raceLength);
+  double get_Time(){return Time;};
+  double get_NRefuel(){return NRefuel;};
+  void calculateRefuel(double raceLength);
   void time_display();
   int getNwheels() { return Nwheels; }
-  int number_of_damaged_wheels();
+  void number_of_damaged_wheels();
   void output();
-
+  friend vehicle *RatingResults(int qty);
+  friend void outputResults(vehicle *&car,int qty);
   friend ostream &operator<<(ostream &stream, const vehicle &obj) {
     return stream << "Number of wheels: " << obj.Nwheels << ";\n"
                   << "Damaged wheels: " << obj.damaged_wheels << ";\n"
@@ -95,8 +99,8 @@ public:
 int menu(int &flag);
 void clean(int var = 1);
 void create_vehicle(vehicle *&adres, int &qty, vehicle cars);
-vehicle *RatingResults(vehicle *&adres, int qty);
-void outputResults(vehicle *&adres, int qty);
+//vehicle *RatingResults(vehicle *&adres, int qty);
+//void outputResults(vehicle *&adres, int qty);
 /////////////////////////////////MAIN/////////////////////////
 int main() {
   clean();
@@ -172,22 +176,22 @@ int main() {
       } 
       else {
         for (int i = 0; i < qty; i++) {
-          adres[i].Time = adres[i].calculateRaceTime(trackLen);
-          adres[i].mileage = trackLen;
+          adres[i].calculateRaceTime(trackLen);
+          adres[i].setMileage(trackLen);
           for (int j = 0; j < adres[i].getNwheels(); j++) {
-            adres[i].ptr_wheel[j].def_wheel(trackLen, adres[i].Time);
+          adres[i].ptr_wheel[j].def_wheel(trackLen, adres[i].get_Time());
           }
-          adres[i].damaged_wheels = adres[i].number_of_damaged_wheels();
-          adres[i].NRefuel = adres[i].calculateRefuel(trackLen);
-          adres[i].current_fuel = adres[i].calculate_cur_fuel(adres[i].engIntake, trackLen,adres[i].NRefuel);
-          adres[i].speed = adres[i].calculateSpeed();
+          adres[i].number_of_damaged_wheels();
+          adres[i].calculateRefuel(trackLen);
+          adres[i].calculate_cur_fuel(adres[i].calculateIntake(), trackLen,adres[i].get_NRefuel());
+          adres[i].calculateSpeed();
         }
       }
       break;
     }
     case (5): {
       clean();
-      outputResults(*&adres, qty);
+      outputResults(adres,qty);
       break;
     }
     default:
@@ -244,8 +248,8 @@ vehicle *RatingResults(vehicle *&adres, int qty) {
   }
   for (int i = 0; i < qty; i++) {
     for (int j = 0; j < qty; j++) {
-      if ((results[i].Time - results[j].Time < 0) &&
-          (results[i].NRefuel - results[i].NRefuel <= 0)) {
+      if ((results[i].get_Time()- results[j].get_Time() < 0) &&
+          (results[i].get_NRefuel() - results[i].get_NRefuel() <= 0)) {
         rez_copy[0] = results[i];
         results[i] = results[j];
         results[j] = rez_copy[0];
@@ -256,11 +260,11 @@ vehicle *RatingResults(vehicle *&adres, int qty) {
   return results;
 }
 void outputResults(vehicle *&adres, int qty) {
-  vehicle *results = RatingResults(adres, qty);
+  vehicle *results = RatingResults(adres,qty);
   for (int i = 0; i < qty; i++) {
     cout << results[i].name << endl;
     results[i].time_display();
-    cout << "Refuel times: " << int(ceil(results[i].NRefuel)) << endl;
+    cout << "Refuel times: " << int(results[i].NRefuel) << endl;
   }
   delete[] results;
 }
@@ -322,11 +326,11 @@ void engine::def_engine(double power) {
   engPow = power;
   engIntake = calculateIntake();
 }
-double fuel_system ::calculate_cur_fuel(double engIntake, double mileage,double NRefuel) { //расчёт текущего обЪёма топлива
+void fuel_system ::calculate_cur_fuel(double engIntake, double mileage,double NRefuel) { //расчёт текущего обЪёма топлива
   if (NRefuel == 0) {
-    return double(TankCapacity - ((engIntake / 100) * mileage));
+    current_fuel=double(TankCapacity - ((engIntake / 100) * mileage));
   } else {
-    return (((NRefuel)*TankCapacity) - ((engIntake / 100) * mileage));
+    current_fuel=(((NRefuel)*TankCapacity) - ((engIntake / 100) * mileage));
   }
 }
 void fuel_system ::def_fuel_system(double capacity, double engIntake,double mileage) {
@@ -351,38 +355,38 @@ void vehicle::output() {
 
 void vehicle ::time_display() {
   double t = this->Time;
-  int hours = static_cast<int>(t);
+  int hours = int(t);
   double cur_time = (t - hours) * 60;
-  int minutes = static_cast<int>((cur_time));
-  int seconds = static_cast<int>((cur_time - minutes) * 60);
+  int minutes = int(cur_time);
+  int seconds = int((cur_time - minutes) * 60);
   cout << "TIME: " << hours << ":" << minutes << ":" << seconds << endl;
 }
 
-double vehicle ::calculateSpeed() {
+void vehicle ::calculateSpeed() {
   if (damaged_wheels == 0) {
-return double(fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0)));
+speed= double(fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0)));
  }
  else
  {
-   return (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0))/(2*double(damaged_wheels)));
+   speed = (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0))/(2*double(damaged_wheels)));
      }
   }
 
 
-int vehicle ::number_of_damaged_wheels() {
+void vehicle ::number_of_damaged_wheels() {
   int count = 0;
   for (int i = 0; i < Nwheels; i++) {
-    if (ptr_wheel[i].status == 1) {
+    if (ptr_wheel[i].get_status() == 1) {
       count++;
     }
   }
-  return count;
+  damaged_wheels = count;
 }
 
-double vehicle ::calculateRefuel(double raceLength) {
-  double NRefuel = (raceLength * (engIntake / 100)) / TankCapacity;
-  if (NRefuel > 1)
-    return ceil(NRefuel);
+void vehicle ::calculateRefuel(double raceLength) {
+  double Refuel = (raceLength * (engIntake / 100)) / TankCapacity;
+  if (Refuel > 1)
+    this->NRefuel= ceil(Refuel);
   else
-    return floor(NRefuel);
+    this->NRefuel= floor(Refuel);
 }
