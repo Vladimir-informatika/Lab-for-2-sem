@@ -145,10 +145,9 @@ void SetData(regular_polygon* reg_pol, int amount, int* output)
 
     coordinates(reg_pol, amount);
 }
-////////////   regpol several, not one
 
 
-/////// ОГРАНИЧЕНИЯ///////
+
 
 /////////////// МЕНЮ////////////////
 
@@ -167,8 +166,6 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     char choice = '0';
     cin >> choice;
     int choose = int(choice)-48;
-    //int choose;
-    //cin >> choose;
     cout << '\n';
     switch (choose)
     {
@@ -370,60 +367,19 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
 void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount, int* output)
 {
     int i_max = 0;
-    double* sq_per = new double[amount];
+    double* sq_per = new double[amount];   // создаем временный массив площади/периметра
     if (amount == 0)
     {
         cout << "There are no polygons" << endl;
         return;
     }
-    if (k == 1) for (int i = 0; i < amount; i++) sq_per[i] = reg_pol[i].square;
-    else for (int i = 0; i < amount; i++) sq_per[i] = reg_pol[i].perimeter;
-
+    if (k == 1) for (int i = 0; i < amount; i++) sq_per[i] = reg_pol[i].square; // записываем туда площади
+    else for (int i = 0; i < amount; i++) sq_per[i] = reg_pol[i].perimeter;  //  записываем периметры
+    //прооняем условие и выполняем
     for (int j = 0; j < amount; j++)
         if (((sq_per[j] - sq_per[i_max]) > 0) && (output[j] == 1)) i_max = j;
     for (int p = i_max; p < amount; p++)
         if (((sq_per[p] - sq_per[i_max]) == 0) && (output[p] == 1)) cout << p+1 << '\t';
     cout << endl;
     delete[] sq_per;
-    /*
-    if (k == 1)
-    {
-        if (amount == 0) cout << "there are no polygons" << endl;
-        else
-        {
-
-            for (int i = 0; i < amount; i++)
-            {
-                if (((reg_pol[i].square - reg_pol[i_max].square) > 0) && (output[i] == 1 )) i_max = i;
-            }
-            for (int i = i_max; i < amount; i++)
-            {
-                if (((reg_pol[i].square - reg_pol[i_max].square) == 0) && (output[i] == 1 ))
-                {
-                    cout << i + 1 << '\t';
-                }
-            }
-            cout << endl;
-        }
-    }
-    else if (k == 2)
-    {
-        if (amount == 0) cout << "there are no polygons" << endl;
-        else
-        {
-            for (int i = 0; i < amount; i++)
-            {
-                if (((reg_pol[i].perimeter - reg_pol[i_max].perimeter) > 0) && (output[i] == 1 )) i_max = i;
-            }
-            for (int i = i_max; i < amount; i++)
-            {
-                if (((reg_pol[i].perimeter - reg_pol[i_max].perimeter) == 0) && (output[i] == 1 ))
-                {
-                    cout << i + 1 << '\t';
-                }
-            }
-            cout << endl;
-        }
-    }
-    */
 }
