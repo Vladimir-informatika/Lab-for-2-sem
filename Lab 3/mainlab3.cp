@@ -384,7 +384,7 @@ speed= double(fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel
  }
  else
  {
-   speed = (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0))/(2*double(damaged_wheels)));
+   speed = (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0))/(pow(2., double(damaged_wheels))));
      }
   }
 
