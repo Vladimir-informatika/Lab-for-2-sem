@@ -4,6 +4,8 @@
 #include <string>
 #include <ctime>
 #include <vector>
+#include <iterator>
+#include <algorithm>
 using namespace std;
 double Refuel_time=0.03;//примерно 2 минуты
 double Change_time=0.017;//примерно 1 минута
@@ -25,6 +27,9 @@ public:
   }
   virtual void output();
   int get_status() { return status; }
+  void set_status(int status) {
+    this->status = status;
+  }
 };
 
 class engine {
@@ -42,7 +47,7 @@ protected:
   double current_fuel; //текущий обЪём топлива литры l;
 public:
   double TankCapacity; //обЪём бака литры l
-  void calculate_cur_fuel(double engIntake, double mileage, double NRefuel);
+  void calculate_cur_fuel(double engIntake, double mileage);
   fuel_system(){TankCapacity=0;current_fuel=0;};
   void def_fuel_system(double capacity, double engIntake, double mileage);
 };
@@ -58,13 +63,14 @@ private:
 public:
   wheel *ptr_wheel;
   string name;
+   double current_mileage;
   vehicle() {
     name = "ADDVEHICLE";
-    Time = mileage = NRefuel = damaged_wheels = 0;
+    Time = current_mileage=mileage = NRefuel = damaged_wheels = 0;
     ptr_wheel = 0;
   }
   vehicle(string vehicle_name, int wheels) {
-    mileage =damaged_wheels = 0; 
+    current_mileage=mileage =damaged_wheels = 0; 
     name=vehicle_name;
     Nwheels=wheels;
     ptr_wheel = new wheel[wheels];
@@ -83,6 +89,7 @@ public:
   };
   double get_mileage(){return mileage;};
   double get_Time(){return Time;};
+  void set_Time(double Time){this->Time=Time;};
   double get_NRefuel(){return NRefuel;};
   double get_speed(){return speed;};
   int get_damaged_wheels(){return damaged_wheels;};
@@ -96,8 +103,22 @@ public:
   friend vehicle *RatingResults(int qty);
   friend void outputResults(vector <vehicle> car,int qty);
 
+  void reset()
+ {
+   for(int i=0;i<Nwheels;i++)
+     {
+       ptr_wheel[i].set_status(0);
+     }
+   damaged_wheels=0;
+   current_mileage=mileage=0;
+   NRefuel=0;
+   Time=0;
+   current_fuel=TankCapacity;
+   calculateSpeed();
+ }
+
   friend ostream &operator<<(ostream &stream, const vehicle &obj) {
-    return stream <<"Name: "<<obj.name<<"\n"
+    return stream <<"\n"<<"Name: "<<obj.name<<"\n"
       << "Number of wheels: " << obj.Nwheels << ";\n"
                   << "Damaged wheels: " << obj.damaged_wheels << ";\n"
                   << "Speed: " << obj.speed << " km/h;\n"
@@ -109,19 +130,18 @@ public:
   }
 
 vehicle& operator=(const vehicle& other) {
-  if (this == &other) { 
-      return *this;
-  }
   name = other.name;
   Nwheels = other.Nwheels;
   speed = other.speed;
   mileage = other.mileage;
+  current_mileage=other.current_mileage;
   Time=other.Time;
   return *this;
 };
 };
 
-int allfinished(vector<vehicle> &v);
+int allfinished(vector<vehicle> &v,double trackLen,int circles);
+int skip(vector<int> skip_id, int i);
 
 vector<vehicle>RatingResults(vector<vehicle> v);
 void outputResults(vector<vehicle> v);
@@ -193,39 +213,48 @@ int main() {
     }
     case (4): {
       clean();
-      if (trackLen == 0) {
+      if (trackLen == 0 || NumCircles==0) {
         cout << "You haven't entered the length of the track!\n";
         rez = 0;
         break;
       } 
       else 
       {
+         for(int i=0;i<cars.size();i++)
+          {
+            cars[i].reset();
+          }
          double current_time=0;
-         double current_mileage=0;
-         double dt=0.0003;//примерно 1 секунда
-         /*int *skip_id[cars.size()];*/
-         for(current_time=0;allfinished(cars)!=1;current_time+=dt)
+         double dt=0.0003;
+         vector<int> skip_id={-1};
+    for(current_time=0;allfinished(cars,trackLen,NumCircles)!=1;current_time+=dt)
             {
-              for (int i = 0; i < cars.size(); i++) {
-                /*if (*skip_id[i] == 1) {
-                  continue;
-                }*/
-                current_mileage+=(cars[i].get_speed()*current_time);
-                  cars[i].setMileage(current_mileage);
+              for (int i = 0; i < cars.size(); i++) 
+              {
+                //if (find(skip_id.begin(), skip_id.end(), i) == skip_id.end()) {
+               cars[i].current_mileage = cars[i].current_mileage +(cars[i].get_speed()*current_time);
+              cout<<cars[i].current_mileage<<endl;
+              cout<<current_time<<endl;
+                //cars[i].setMileage(cars[i].current_mileage);
                 for (int j = 0; j < cars[i].getNwheels(); j++) {
             cars[i].ptr_wheel[j].def_wheel(trackLen,cars[i].get_speed());
                 }
                   cars[i].number_of_damaged_wheels();
-cars[i].calculate_cur_fuel(cars[i].calculateIntake(),current_mileage,cars[i].get_NRefuel());
+cars[i].calculate_cur_fuel(cars[i].calculateIntake(),cars[i].current_mileage);
                   cars[i].calculateSpeed();
-                /*if (cars[i].get_current_fuel()<=0 || cars[i].get_damaged_wheels()>0)
-                {
-                  *skip_id[i]=1;
-                }*/
-              }
-              cout<<"1END"<<endl;
+                 if ((cars[i].get_damaged_wheels()==cars[i].getNwheels()) || cars[i].current_mileage>=trackLen)
+                 {
+                   skip_id.push_back(i);//будет пропускать это ТС
+                   cars[i].set_Time(current_time);
+                 }
+                }
+                
+              
+
+              //cout<<"1END"<<endl;
             }
           cout<<"2END"<<endl;
+        break;
       }
       break;
     }
@@ -255,7 +284,7 @@ int menu(int &rez) {
   cout << "0 for exit\n";
   cout << "1 for adding Vehicle\n";
   cout << "2 for output information about Vehicle\n";
-  cout << "3 to enter length of the track\n";
+  cout << "3 to enter the track\n";
   cout << "4 for route calculation\n"; //расчет прохождения трассы
   if (rez == 1)
     cout << "5 for results of last race\n";
@@ -268,25 +297,20 @@ int menu(int &rez) {
 }
 
 vector<vehicle>  RatingResults(vector<vehicle> v) {
-  vector<vehicle> results;
-  vehicle temp;
-  results=v;
-  cout<<"REZ"<<results[0]<<endl;
-  for (int i = 0; i < v.size(); i++) {
-    for (int j = 0; j < v.size(); j++) {
-      if ((v[i].get_Time() - v[j].get_Time() < 0))
-        temp = results[i];
-        results[i] = results[j];
-        results[j] = temp;
-      }
+    sort(v.begin(), v.end(), []( vehicle& a,  vehicle& b) {
+    if (a.get_Time() != b.get_Time()) {
+      return a.get_Time() < b.get_Time();
+    } 
+    else {
+      return a.get_NRefuel() < b.get_NRefuel(); 
     }
-  cout<<temp<<endl;
-  return results;
+  });
+  return v;
 }
+
 void outputResults(vector<vehicle> v) {
-  cout<<"Zzzzzz"<<endl;
   vector<vehicle> results = RatingResults(v);
-  for (int i = 0; i < v.size(); i++) {
+  for (int i = 0; i < results.size(); i++) {
     cout << results[i].name << endl;
     results[i].time_display();
     //cout << "Refuel times: " << int(results[i].NRefuel) << endl;
@@ -344,12 +368,8 @@ void engine::def_engine(double power) {
   engIntake = calculateIntake();
 }
 
-void fuel_system ::calculate_cur_fuel(double engIntake, double mileage,double NRefuel) { //расчёт текущего обЪёма топлива
-  if (NRefuel == 0) {
+void fuel_system ::calculate_cur_fuel(double engIntake, double mileage) { //расчёт текущего обЪёма топлива
     current_fuel=double(TankCapacity - ((engIntake / 100) * mileage));
-  } else {
-    current_fuel=(((NRefuel)*TankCapacity) - ((engIntake / 100) * mileage));
-  }
 }
 
 void fuel_system ::def_fuel_system(double capacity, double engIntake,double mileage) {
@@ -375,7 +395,7 @@ speed= double(fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel
  }
  else
  {
-   speed = (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0))*(pow(20.75, double(damaged_wheels))));
+   speed = (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0))*(pow(0.75, double(damaged_wheels))));
      }
   }
 
@@ -405,12 +425,12 @@ int vehicle ::need_refuel(double tracklen)
   else return 0;
 }
 
-int allfinished(vector<vehicle> &v)
+int allfinished(vector<vehicle> &v,double trackLen,int circles)
 {
   int count=0;
   for (int i=0;i<v.size();i++)
     {
-      if (v[i].get_mileage()>=0)
+      if (v[i].current_mileage>=trackLen*circles)
       {
         count++;
       }
@@ -420,6 +440,17 @@ int allfinished(vector<vehicle> &v)
     return 1;
   }
   else return 0;
+}
+
+
+int skip(vector<int> skip_id, int i)
+{
+  for (int j = 0; j < skip_id.size(); j++)
+    {
+      if (skip_id[j]==i)
+        return 1;
+    }
+  return 0;
 }
 
 /*void drive(int qty, double tracklen, vector<vehicle> &v)
