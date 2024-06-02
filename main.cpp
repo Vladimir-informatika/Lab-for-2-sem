@@ -1,52 +1,39 @@
 #include <iostream>
+#include <string>
+#include <cmath>
 
 using namespace std;
 
-void time_calc(double distance, double strong);
-
-
-class Vehicle{
-    public:
-        char name;
-        double mileage;
-        double power;
-        double speed;
-        int count_wheels;
-        double volume;
-        double consumption;
-        double time;
-} Car;
+class Transport
+{
+    int count_wheels;
+    double mileage;
+    double volume_tank;
+    double power_engine;
+    double travel_time;
+    string name;
+public:
+    Transport(int countWheels, double mil, double volumeTank, double power, double time, string n)
+    {
+        count_wheels = countWheels;
+        mileage = mil;
+        volume_tank = volumeTank;
+        power_engine = power;
+        travel_time = time;
+        name = n;
+    }
+    //double CalcEngineConsumption();
+    //double CalcSpeed();
+    //double CalcTime();
+    //int CalcRefills();
+    void Print()
+    {
+        cout << name << travel_time << power_engine << volume_tank << mileage << count_wheels;
+    }
+    ~Transport() { cout << "Deleled object"; };
+};
 int main()
 {
-    Vehicle *ptr = &Car;
-    
-    cout << "Enter power: " << endl;
-    cin << ptr->power << endl;
-
-    cout << "Enter the distance: " << endl;
-    cin << distance << endl;
-
-    cout << "Enter engine capacity: " << endl;
-    cin << ptr->V << endl;
-    
-    cout << "Enter mileage: " << endl;
-    cin << ptr->mileage << endl;
-
-    ptr->consump = 100 * ptr->V / ptr->mileage;
-
-    cout << ptr->consump << endl;
-
-    cout << "time:"
-    time_calc(distance, strong);
-
-    return 0;
-}
-
-void time_calc(double distance, double strong){
-    double mass = 1250;
-    double mu = 0.02;
-    strong = mu * mass * 10;
-    speed = ptr->power / strong;
-    time = distance / speed;
-    cout << speed << endl;
+    Transport Car(3, 5, 5, 5, 5, "car");
+    Car.Print();
 }
