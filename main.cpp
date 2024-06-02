@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-
+#include <string>
 
 using namespace std;
 
@@ -97,12 +97,13 @@ void SetData(regular_polygon* reg_pol, int amount, int* output)
 
     cout << "Enter length of the side:" << '\n';
     cin >> reg_pol[amount].length;
+
     flag = false;
     if (reg_pol[amount].length > 0) flag = true;
     while (flag == false)
     {
         cout << "Incorrect! Length must be more than 0. Try again" << '\n';
-        cin >> reg_pol[amount].count_sides;
+        cin >> reg_pol[amount].length;
         if (reg_pol[amount].length > 0) flag = true;
     }
 
@@ -163,9 +164,17 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     cout << "5 - Close the programm" << '\n';
     cout << '\n' << "Your input: ";
 
-    char choice = '0';
+    string choice;
     cin >> choice;
-    int choose = int(choice)-48;
+    int choose = 0;
+    //int choose = int(choice)-48;
+    for (int i = 0; i < choice.length(); i++)
+        {
+            if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
+            {
+                choose += int(choice[i])-48;
+            }
+        }
     cout << '\n';
     switch (choose)
     {
@@ -192,11 +201,18 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
         {
             cout << "Error: try again! " << '\n';
         }
+
         else
         {
-            cout << "As you wish" << '\n';
-            output[chosenForDelete - 1] = 0;
-            //output = del_struct(output, chosenForDelete);
+            if (output[chosenForDelete - 1] == 0)
+            {
+                cout << "This polygon is deleted!" << endl;
+            }
+            else
+            {
+                cout << "As you wish" << '\n';
+                output[chosenForDelete - 1] = 0;
+            }
         }
         break;
     case 4:
@@ -217,11 +233,13 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 /// В Ы В О Д
 void print(regular_polygon* reg_pol, int amount, int* output)
 {
+    int p = 0;
     for (int i = 0; i < amount; i++)
     {
         if (output[i] == 1)
         {
-            cout << "Polygon number " << i + 1 << endl;
+            p+= 1;
+            cout << "Polygon number " << p << endl;
 
             cout << "quontity of vertexes: ";
             cout << reg_pol[i].count_sides << '\n';
@@ -250,8 +268,17 @@ void print(regular_polygon* reg_pol, int amount, int* output)
 void check(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 {
     cout << "Are you sure that you want to quit? (1 - yes; 0 - no)" << '\n';
-    int k;
-    cin >> k;
+    string choice;
+    cin >> choice;
+    int k = 0;
+    for (int i = 0; i < choice.length(); i++)
+        {
+            if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
+            {
+                k += int(choice[i])-48;
+            }
+        }
+    cout << '\n';
     switch (k)
     {
     case 1:
@@ -274,20 +301,28 @@ void submenu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
 {
     cout << "What are you going to do?" << '\n';
     cout << "1 - Max Square" << endl << "2 - Max Perimeter"  << endl << "3 - quit" << endl;
-    char choice = '0';
+    string choice;
     cin >> choice;
-    int k = int(choice)-48;
+    int l = 0;
+    for (int i = 0; i < choice.length(); i++)
+        {
+            if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
+            {
+                l += int(choice[i])-48;
+            }
+        }
+    cout << '\n';
 
-    switch (k)
+    switch (l)
     {
     case 1:
         cout << "Let's look" << endl << "-----------------------" << endl;
-        square_perimeter(k , OurPolygon, PolygonAmount, output);
+        square_perimeter(l , OurPolygon, PolygonAmount, output);
         cout << "That's all" << '\n';
         break;
     case 2:
         cout << "Let's look" << endl << "-----------------------" << endl;
-        square_perimeter(k , OurPolygon, PolygonAmount, output);
+        square_perimeter(l , OurPolygon, PolygonAmount, output);
         cout << "That's all" << '\n';
 
         break;
