@@ -21,8 +21,8 @@ public:
 
     double CalcEngineConsumption();
     double CalcSpeed();
-    double CalcTravelTime();
-    int CalcRefills();
+    double CalcTravelTime(double distance);
+    int CalcRefills(double distance);
     void Print();
 
     ~Transport();
@@ -47,27 +47,31 @@ Transport::Transport(int countWheels, double mil, double volumeTank, double powe
 }
 
 double Transport::CalcSpeed() {
-    return 0;
+    return power_engine * 0.5 / count_wheels;
 }
 
 double Transport::CalcEngineConsumption() {
-    return 0;
+    return power_engine * 0.5;
 }
 
-double Transport::CalcTravelTime() {
-    return 0;
+double Transport::CalcTravelTime(double distance) {
+    return distance / CalcSpeed();
 }
 
-int Transport::CalcRefills() {
-    return 0;
+int Transport::CalcRefills(double distance) {
+    return (int)floor(distance / (volume_tank * CalcEngineConsumption()));
 }
 
 void Transport::Print() {
-    return;
+
 }
 
 int main()
 {
-    Transport Car(3, 5, 5, 5, 5, "car");
-    Car.Print();
+    Transport* vehicle;
+    int amount = 0;
+
 }
+
+void menu ();
+
