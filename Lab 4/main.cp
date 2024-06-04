@@ -23,10 +23,15 @@ public:
   int check_status(double mileage, double speed); 
   wheel() {status=0;current_mileage=0;};
   virtual ~wheel(){};//требуется для корректной работы компилятора 
-  double def_wheel(double mileage, double speed) {
-    current_mileage += mileage;
-    status = check_status(current_mileage,speed);
-    return current_mileage;
+  void def_wheel(double mileage, double speed) {
+    if (mileage==0) {
+      current_mileage=0;
+      status=0;
+    }
+    else{
+      current_mileage += mileage;
+      status = check_status(current_mileage,speed);
+    }
   }
   virtual void output();
   int get_status() { return status; }
@@ -63,7 +68,6 @@ private:
   int damaged_wheels = 0;
   double NRefuel; //количесвто дозаправок
 public:
-  //wheel *ptr_wheel;
   vector<wheel> vec_wheels;
   string name;
   double mileage; //пробег km
@@ -74,7 +78,6 @@ public:
     name = "ADDVEHICLE";
     Time = current_mileage=mileage = NRefuel = pit_stop_time = 0;
     current_circles=damaged_wheels=0;
-    //ptr_wheel = 0;
   }
   vehicle(string vehicle_name, int wheels) {
     current_mileage=mileage=pit_stop_time=damaged_wheels = current_circles=0; 
@@ -87,57 +90,6 @@ public:
     def_fuel_system();
     def_engine(0);
     calculateSpeed();
-  }
-  friend istream &operator >> (istream &stream,vehicle& obj)
-  {
-    cout<<"Vehicle name: ";
-    stream>>obj.name;
-    try
-      {
-        cout<<"Number of wheels: ";
-        stream>>obj.Nwheels;
-        if (obj.Nwheels < 2){
-            throw "Uncorrect number of wheels! try again";
-      }
-      }    
-      catch (const char* msg) {
-        cerr << "Exception caught: " << msg <<endl;
-        obj.Nwheels=InputProve(obj.Nwheels);
-      }
-      for (int i = 0; i < obj.Nwheels; i++) {
-        wheel newWheel;
-        obj.vec_wheels.push_back(newWheel);
-        }
-      try
-        {
-          cout<<"Tank capacity: ";
-          stream>>obj.TankCapacity;
-          if (obj.TankCapacity<=0){
-            throw "Uncorrect tank capacity! try again";
-          }
-        }
-        catch (const char* msg)
-        {
-          cerr << "Exception caught: " << msg <<endl;
-          obj.TankCapacity=InputProve(obj.TankCapacity);
-        }
-      try
-        {
-          cout<<"Engine power: ";
-          stream>>obj.engPow;
-          if (obj.engPow<=0){
-            throw "Uncorrect power of engine! try again";
-          }
-        }
-        catch (const char* msg)
-        {
-          cerr << "Exception caught: " << msg <<endl;
-          obj.engPow=InputProve(obj.engPow);
-        }
-        obj.current_fuel=obj.TankCapacity;
-        obj.def_engine(obj.engPow);
-        obj.calculateSpeed();
-    return stream;
   }
   
   void calculateSpeed();
@@ -161,7 +113,7 @@ public:
 
   double wheels_chage()
   {
-    double time=vec_wheels.size()*Change_time;
+    double time=damaged_wheels*Change_time;
     return time;
   }
 
@@ -199,6 +151,58 @@ public:
                   << "engine intake: " << obj.engIntake << " l/100km;" << endl;
   }
 
+  friend istream &operator >> (istream &stream,vehicle& obj)
+    {
+      cout<<"Vehicle name: ";
+      stream>>obj.name;
+      try
+        {
+          cout<<"Number of wheels: ";
+          stream>>obj.Nwheels;
+          if (obj.Nwheels < 2){
+              throw "Uncorrect number of wheels! try again";
+        }
+        }    
+        catch (const char* msg) {
+          cerr << "Exception caught: " << msg <<endl;
+          obj.Nwheels=InputProve(obj.Nwheels);
+        }
+        for (int i = 0; i < obj.Nwheels; i++) {
+          wheel newWheel;
+          obj.vec_wheels.push_back(newWheel);
+          }
+        try
+          {
+            cout<<"Tank capacity: ";
+            stream>>obj.TankCapacity;
+            if (obj.TankCapacity<=0){
+              throw "Uncorrect tank capacity! try again";
+            }
+          }
+          catch (const char* msg)
+          {
+            cerr << "Exception caught: " << msg <<endl;
+            obj.TankCapacity=InputProve(obj.TankCapacity);
+          }
+        try
+          {
+            cout<<"Engine power: ";
+            stream>>obj.engPow;
+            if (obj.engPow<=0){
+              throw "Uncorrect power of engine! try again";
+            }
+          }
+          catch (const char* msg)
+          {
+            cerr << "Exception caught: " << msg <<endl;
+            obj.engPow=InputProve(obj.engPow);
+          }
+          obj.current_fuel=obj.TankCapacity;
+          obj.def_engine(obj.engPow);
+          obj.calculateSpeed();
+      return stream;
+    }
+
 vehicle& operator=(const vehicle& other) {
   name = other.name;
   Nwheels = other.Nwheels;
@@ -216,7 +220,6 @@ int skip(vector<int> skip_id, int i);
 
 vector<vehicle>RatingResults(vector<vehicle> v);
 void outputResults(vector<vehicle> v);
-//void drive(int qty, double tracklen, vector<vehicle> &v);
 //////////////////////////////////////////////////////////
 int main() {
   vector<vehicle> race_rez;
@@ -227,10 +230,19 @@ int main() {
   int rez = 0;
   while (flag == 1) {
     int choice = 10;
-    choice = menu(rez);
-    if ((choice > 5) || (choice < 0)) {
-      cout << "\nError, try another number!\n";
-    }
+    try
+      {
+      choice = menu(rez);
+      if ((choice > 5) || (choice < 0)) {
+        throw "Error, try another number!";
+        }
+      }
+    catch (const char* msg)
+      {
+        cerr << "Exception caught: " << msg << endl;
+        cout<<"try again ";
+        choice = InputProve(choice);
+      }
     switch (choice) {
     case (0): {
       cout << "Are you sure you want to exit?\n1-yes\n0-go back\n";
@@ -274,8 +286,19 @@ int main() {
     }
     case (3): {
       clean();
-      cout<<"The number of circles: ";
-      NumCircles=InputProve(NumCircles);
+      try{
+        cout<<"The number of circles: ";
+        NumCircles=InputProve(NumCircles);
+        if (NumCircles<=0){
+          throw "Uncorrect number of circles! try again";
+        }
+      }
+      catch (const char* msg)
+        {
+          cerr << "Exception caught: " << msg << endl;
+          cout<<"try again ";
+          NumCircles=InputProve(NumCircles);
+        }
       cout << "Enter the length of the track (km): ";
       trackLen = InputProve(trackLen);
       rez = 0;
@@ -306,9 +329,9 @@ int main() {
                 }
                 cars[i].mileage = cars[i].mileage +(cars[i].get_speed()*current_time);
                 cars[i].current_mileage = cars[i].current_mileage +(cars[i].get_speed()*current_time);
-                for (int j = 0; j < cars[i].getNwheels(); j++)
+                for (int j = 0; j < cars[i].vec_wheels.size(); j++)
                   {
-                cars[i].vec_wheels[j].def_wheel(trackLen,cars[i].get_speed());
+                    cars[i].vec_wheels[j].def_wheel(cars[i].mileage,cars[i].get_speed());
                   }
                 cars[i].number_of_damaged_wheels();
                 cars[i].calculate_cur_fuel(cars[i].calculateIntake(),cars[i].current_mileage);
@@ -324,6 +347,11 @@ int main() {
                           cout<<"REFUEL"<<endl;
                       }
                   }*/
+                  /*cout<<"car: "<<cars[i].name<<" Time: "<<current_time
+                  <<" speed: "<<cars[i].get_speed()<<"\n"
+                  <<" Current fuel "<<cars[i].get_current_fuel()
+                  <<" Damaged wheels: "<<cars[i].get_damaged_wheels()<<endl;*/
+                  cout<<"Damaged wheels: "<<cars[i].get_damaged_wheels()<<endl;
                   if ((trackLen*NumCircles)-(cars[i].mileage)<=0) {
                     skip_id.push_back(i); // ТС будет пропускаться, так как финищировала
                     cars[i].set_Time(current_time);
@@ -389,7 +417,7 @@ void outputResults(vector<vehicle> v) {
     cout << results[i].name << endl;
     results[i].time_display();
     cout<<"Circles "<<results[i].current_circles<<endl;
-    //cout << "Refuel times: " << int(results[i].NRefuel) << endl;
+    //cout << "Refuel times: " << int(cars[i].NRefuel) << endl;
   }
 }
 
@@ -479,7 +507,7 @@ speed= double(fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel
 
 void vehicle ::number_of_damaged_wheels() {
   int count = 0;
-  for (int i = 0; i < Nwheels; i++) {
+  for (int i = 0; i < vec_wheels.size(); i++) {
     if (vec_wheels[i].get_status() == 1) {
       count++;
     }
@@ -504,9 +532,10 @@ int vehicle ::need_refuel(double tracklen)
 
 void vehicle::reset()
  {
-   for(int i=0;i<Nwheels;i++)
+   for(int i=0;i<vec_wheels.size();i++)
      {
        vec_wheels[i].set_status(0);
+       cout<<vec_wheels[i].get_status()<<endl;
      }
    damaged_wheels=0;
    current_mileage=mileage=0;
@@ -514,6 +543,7 @@ void vehicle::reset()
    Time=0;
    current_fuel=TankCapacity;
    calculateSpeed();
+   cout<<"\n"<<name<<" reseted"<<endl;
  }
 
 int allfinished(vector<vehicle> &v,double trackLen,int circles)
