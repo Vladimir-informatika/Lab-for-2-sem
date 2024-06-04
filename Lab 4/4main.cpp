@@ -261,15 +261,17 @@ int main() {
                 {
                     flag=1;
                 }
-                cout<<"1"<<cars[i].current_mileage<<endl;
-                if(cars[i].calc_circles(trackLen))
+                if(cars[i].calc_circles(trackLen)==1)///////////здесь ошибка ;(
                 {
-                    cout<<"2"<<cars[i].current_mileage<<endl;
+                    if (cars[i].need_refuel(trackLen))
+                    {
+                        cout<<"REFUEL"<<endl;
+                    }
                 }
-                if ((cars[i].current_mileage >= (trackLen*NumCircles))) {
+                if ((trackLen*NumCircles)-(cars[i].mileage)<=0) {
                   skip_id.push_back(i); // ТС выбыла
                   cars[i].set_Time(current_time);
-                  //cars[i].current_circles=NumCircles;
+                  cars[i].current_circles=NumCircles;
                 }
                 }
 
