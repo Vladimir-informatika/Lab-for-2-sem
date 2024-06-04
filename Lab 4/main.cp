@@ -6,6 +6,7 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#include <iomanip>
 using namespace std;
 double Refuel_time=0.003;//примерно 10 секунд
 double Change_time=0.008;//примерно 30 секунд
@@ -134,7 +135,7 @@ public:
           obj.engPow=InputProve(obj.engPow);
         }
         obj.current_fuel=obj.TankCapacity;
-        obj.def_engine(0);
+        obj.def_engine(obj.engPow);
         obj.calculateSpeed();
     return stream;
   }
@@ -462,7 +463,7 @@ void vehicle ::time_display() {
   double cur_time = (t - hours) * 60;
   int minutes = int(cur_time);
   int seconds = int((cur_time - minutes) * 60);
-  cout << "TIME: " << hours << ":" << minutes << ":" << seconds << endl;
+  cout << "TIME: " << setw(4)<<setfill('0')<<hours << ":" << setw(2)<<setfill('0')<<minutes << ":" << setw(2)<<setfill('0')<<seconds << endl;
 }
 
 void vehicle ::calculateSpeed() {
