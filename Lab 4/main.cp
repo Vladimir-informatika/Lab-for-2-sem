@@ -29,7 +29,7 @@ public:
       status=0;
     }
     else{
-      current_mileage += mileage;
+      current_mileage = mileage;
       status = check_status(current_mileage,speed);
     }
   }
@@ -65,7 +65,7 @@ private:
   int Nwheels;
   double speed; //скорость км/ч km/h
   double Time;    //время пути hour
-  int damaged_wheels = 0;
+  int damaged_wheels;
   double NRefuel; //количесвто дозаправок
 public:
   vector<wheel> vec_wheels;
@@ -80,7 +80,8 @@ public:
     current_circles=damaged_wheels=0;
   }
   vehicle(string vehicle_name, int wheels) {
-    current_mileage=mileage=pit_stop_time=damaged_wheels = current_circles=0; 
+    current_mileage=mileage=pit_stop_time=0;
+    damaged_wheels = current_circles=0; 
     name=vehicle_name;
     Nwheels=wheels;
     for (int i = 0; i < wheels; i++) {
@@ -314,53 +315,61 @@ int main() {
       else 
       {
         for(int i=0;i<cars.size();i++)
-        {
-          cars[i].reset();
-        }
-       double current_time=0;
-       vector<int> skip_id={-1};
-       while(!allfinished(cars,trackLen,NumCircles))
-            {
-              current_time+=dt;
-              for (int i = 0; i < cars.size(); i++) 
+          {
+            cars[i].reset();
+          }
+        double current_time=0;
+        vector<int> skip_id{-1};
+        while(!allfinished(cars,trackLen,NumCircles))
+          {
+            for (int i = 0; i < cars.size(); i++)
               {
-                if (find(skip_id.begin(), skip_id.end(), i) != skip_id.end()) {
+                int exit=0;
+                if (find(skip_id.begin(), skip_id.end(), i) != skip_id.end()) 
+                {
                   continue; // Пропускаем итерацию
                 }
-                cars[i].mileage = cars[i].mileage +(cars[i].get_speed()*current_time);
-                cars[i].current_mileage = cars[i].current_mileage +(cars[i].get_speed()*current_time);
-                for (int j = 0; j < cars[i].vec_wheels.size(); j++)
+                else
+                {
+                  cars[i].mileage = cars[i].mileage + (cars[i].get_speed()*current_time);
+                  cars[i].current_mileage = cars[i].current_mileage +(cars[i].get_speed()*current_time);
+                  for (int j = 0; j < cars[i].vec_wheels.size(); j++)
                   {
                     cars[i].vec_wheels[j].def_wheel(cars[i].mileage,cars[i].get_speed());
                   }
-                cars[i].number_of_damaged_wheels();
-                cars[i].calculate_cur_fuel(cars[i].calculateIntake(),cars[i].current_mileage);
-                cars[i].calculateSpeed();
-                if (cars[i].get_damaged_wheels()!=0)
+                  cars[i].number_of_damaged_wheels();
+                  cars[i].calculate_cur_fuel(cars[i].calculateIntake(),cars[i].current_mileage);
+                  cars[i].calculateSpeed();
+                  cout<<"car: "<<cars[i].name<<" Time: "<<current_time
+                    <<" speed: "<<cars[i].get_speed()<<"\n"
+                    <<" Current fuel "<<cars[i].get_current_fuel()
+                    <<" Damaged wheels: "<<cars[i].get_damaged_wheels()<<"\n"
+                    <<" Mileage: "<<cars[i].get_mileage()<<"\n";
+                  if (cars[i].get_damaged_wheels()==cars[i].vec_wheels.size())
                   {
-                      flag=1;
+                      exit=1;
+                      cars[i].set_Time(current_time);
+                      //номер круга
+                      break;
                   }
-                /*if(cars[i].calc_circles(trackLen)==1)///////////error;(
+                  if ((trackLen*NumCircles)-(cars[i].mileage)<=0) 
                   {
-                    if (cars[i].need_refuel(trackLen))
-                      {
-                          cout<<"REFUEL"<<endl;
-                      }
-                  }*/
-                  /*cout<<"car: "<<cars[i].name<<" Time: "<<current_time
-                  <<" speed: "<<cars[i].get_speed()<<"\n"
-                  <<" Current fuel "<<cars[i].get_current_fuel()
-                  <<" Damaged wheels: "<<cars[i].get_damaged_wheels()<<endl;*/
-                  cout<<"Damaged wheels: "<<cars[i].get_damaged_wheels()<<endl;
-                  if ((trackLen*NumCircles)-(cars[i].mileage)<=0) {
-                    skip_id.push_back(i); // ТС будет пропускаться, так как финищировала
+                    exit=1;
                     cars[i].set_Time(current_time);
                     cars[i].current_circles=NumCircles;
+                    break;
                   }
                 }
-            
-      }
-        break;
+                if (exit==1)
+                  {
+                    cout<<"5 ABOBA"<<endl;
+                    skip_id.push_back(i); // ТС будет пропускаться, так как финишировала
+                    cout<<"6 ABOBA"<<endl;
+                    break;
+                  }
+              }
+            current_time+=dt;
+          }
       }
       break;
     }
@@ -445,6 +454,7 @@ int InputProve(int var) {
 }
 
 int wheel::check_status(double mileage, double speed) {
+  if (status == 0){
   double ratio = (1/(mileage)*sqrt(speed));
   if (ratio>=0.5)
   {
@@ -456,7 +466,10 @@ int wheel::check_status(double mileage, double speed) {
     //cout<<"Wheel is damaged"<<endl;
     return 1;
   }
+  }
+  else return 1;
 }
+
 void wheel ::output() {
   if (status == 1) {
     cout << "damaged" << endl;
@@ -535,7 +548,6 @@ void vehicle::reset()
    for(int i=0;i<vec_wheels.size();i++)
      {
        vec_wheels[i].set_status(0);
-       cout<<vec_wheels[i].get_status()<<endl;
      }
    damaged_wheels=0;
    current_mileage=mileage=0;
@@ -543,6 +555,10 @@ void vehicle::reset()
    Time=0;
    current_fuel=TankCapacity;
    calculateSpeed();
+   for (int j = 0; j < vec_wheels.size(); j++)
+     {
+       vec_wheels[j].def_wheel(mileage,get_speed());
+     }
    cout<<"\n"<<name<<" reseted"<<endl;
  }
 
@@ -561,16 +577,5 @@ int allfinished(vector<vehicle> &v,double trackLen,int circles)
     return 1;
   }
   else return 0;
-}
-
-
-int skip(vector<int> skip_id, int i)
-{
-  for (int j = 0; j < skip_id.size(); j++)
-    {
-      if (skip_id[j]==i)
-        return 1;
-    }
-  return 0;
 }
 
