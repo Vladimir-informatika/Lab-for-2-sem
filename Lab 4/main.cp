@@ -476,7 +476,7 @@ void wheel :: def_wheel(double mileage, double speed) {
 
 int wheel::check_status(double mileage, double speed) {
   if (status == 0){
-  double ratio = (1/(mileage)*sqrt(speed));
+  double ratio = 1/(mileage*0.01)*sqrt(speed);
   if (ratio>=0.5)
   {
     //cout<< "Wheel is not damaged"<<endl;
@@ -491,6 +491,22 @@ int wheel::check_status(double mileage, double speed) {
   else return 1;
 }
 
+/*int wheel::check_status(double mileage, double speed) {
+  if (status == 0){ 
+  srand(time(0));
+  int ratio = ceil((1/(mileage*0.01)*sqrt(speed))));
+  int damageProb = (rand() % (ratio+5));
+  if (damageProb - ratio<=0) 
+    {
+      return 1;
+    } 
+    else 
+    {
+      return 0;
+    }
+    }
+  else return 1;
+}*/
 void wheel ::output() {
   if (status == 1) {
     cout << "damaged" << endl;
