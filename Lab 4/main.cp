@@ -146,8 +146,8 @@ public:
                   << "Damaged wheels: " << obj.damaged_wheels << ";\n"
                   << "Speed: " << obj.speed << " km/h;\n"
                   << "Mileage: " << obj.mileage << " km;\n"
-                  << "fuel capacity: " << obj.TankCapacity << "l;\n"
-                  << "current fuel: " << obj.current_fuel << "l\n"
+                  << "fuel capacity: " << obj.TankCapacity << " l;\n"
+                  << "current fuel: " << obj.current_fuel << " l\n"
                   << "engine power: " << obj.engPow << " HP;\n"
                   << "engine intake: " << obj.engIntake << " l/100km;" << endl;
   }
@@ -320,16 +320,17 @@ int main() {
           }
         double current_time=0;
         vector<int> skip_id{-1};
+        int racing_cars=cars.size();
         while(!allfinished(cars,trackLen,NumCircles))
           {
-            for (int i = 0; i < cars.size(); i++)
+            if(racing_cars<=0)
+              {
+                break;//не работает если переместить это условие в while
+              }
+            for (int i = 0; i <cars.size(); i++)
               {
                 int exit=0;
-                if (find(skip_id.begin(), skip_id.end(), i) != skip_id.end()) 
-                {
-                  continue; // Пропускаем итерацию
-                }
-                else
+                if (find(skip_id.begin(), skip_id.end(), i) == skip_id.end()) 
                 {
                   cars[i].mileage = cars[i].mileage + (cars[i].get_speed()*current_time);
                   cars[i].current_mileage = cars[i].current_mileage +(cars[i].get_speed()*current_time);
@@ -350,23 +351,28 @@ int main() {
                       exit=1;
                       cars[i].set_Time(current_time);
                       //номер круга
-                      break;
                   }
                   if ((trackLen*NumCircles)-(cars[i].mileage)<=0) 
                   {
                     exit=1;
                     cars[i].set_Time(current_time);
                     cars[i].current_circles=NumCircles;
-                    break;
                   }
+                  if (exit==1)
+                    {
+                      cout<<"5 ABOBA"<<endl;
+                      skip_id.push_back(i); // ТС будет пропускаться, так как финишировала
+                      cout<<"6 ABOBA"<<endl;
+                      racing_cars=racing_cars-1;
+                      cout<<"Racing cars: "<<racing_cars<<endl;
+                      break;
+
+                    }
                 }
-                if (exit==1)
-                  {
-                    cout<<"5 ABOBA"<<endl;
-                    skip_id.push_back(i); // ТС будет пропускаться, так как финишировала
-                    cout<<"6 ABOBA"<<endl;
-                    break;
-                  }
+                else
+                { 
+                  continue; // Пропускаем итерацию
+                }
               }
             current_time+=dt;
           }
