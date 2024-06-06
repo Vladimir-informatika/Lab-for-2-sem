@@ -5,10 +5,6 @@
 using namespace std;
 
 
-// Для лабы 2
-// ДОБАВИТЬ ЕДИНИЦЫ ИЗМЕРЕНИЯ идестпуктор сам себя вызывает какого-то хуя при создании объекта, хотя мы даже за область виимост не вышли.
-//короче жду пояснения почему деструкторы срабаотывают. что-то с памятью очевидно не то
-
 
 
 class Wheel
@@ -17,7 +13,7 @@ class Wheel
     bool status; // целое или нет
 public:
     Wheel();
-    int CheckStatus(double mileage, double speed);
+    bool CheckStatus(double mileage, double speed);
     double DefWheel(double mileage, double speed);
     int GetStatus();
     virtual void Output();
@@ -26,8 +22,10 @@ Wheel::Wheel() {
     current_mileage = 0;
     status = true;
 }
-int Wheel::CheckStatus(double mileage, double speed) {
-
+bool Wheel::CheckStatus(double mileage, double speed) {
+    double ratio = 1 / (mileage * sqrt(speed));
+    if (ratio >= 0.5) return true;
+    else return false;
 }
 double Wheel::DefWheel(double mileage, double speed) {
     current_mileage = mileage;
