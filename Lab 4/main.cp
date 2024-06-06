@@ -58,21 +58,23 @@ private:
   double Time;    //время пути hour
   int damaged_wheels;
   double NRefuel; //количесвто дозаправок
+  double mileage; //пробег km
+  double current_mileage;//текущее положение на круге km
 public:
   vector<wheel> vec_wheels;
   string name;
-  double mileage; //пробег km
-  double current_mileage;
   int current_circles;
   double pit_stop_time;
   vehicle() {
     name = "ADDVEHICLE";
     Time = current_mileage=mileage = NRefuel = pit_stop_time = 0;
-    current_circles=damaged_wheels=0;
+    damaged_wheels=0;
+    current_circles=1;
   }
   vehicle(string vehicle_name, int wheels) {
     current_mileage=mileage=pit_stop_time=0;
-    damaged_wheels = current_circles=0; 
+    damaged_wheels=0; 
+    current_circles=1;
     name=vehicle_name;
     Nwheels=wheels;
     for (int i = 0; i < wheels; i++) {
@@ -119,13 +121,18 @@ public:
     return time;
   } 
 
-  double get_mileage(){return mileage;};
   double get_Time(){return Time;};
   void set_Time(double Time){this->Time=Time;};
   double get_NRefuel(){return NRefuel;};
   void plus_NRefuel(){NRefuel++;}
   double get_speed(){return speed;};
   int get_damaged_wheels(){return damaged_wheels;};
+  double get_mileage(){return mileage;};
+  void set_mileage(double len){this->mileage=len;};
+  void mileage_plus(double cur_time){this->mileage+=(speed*cur_time);};
+  double get_current_mileage(){return current_mileage;};
+  void set_current_mileage(double len){this->current_mileage=len;};
+  void current_mileage_plus(double cur_time){this->current_mileage+=(speed*cur_time);};
   void calculateRefuel(double raceLength,int circles);
   void need_refuel(double tracklen);
   void need_change();
@@ -220,6 +227,7 @@ vector<vehicle>RatingResults(vector<vehicle> v);
 void outputResults(vector<vehicle> v);
 //////////////////////////////////////////////////////////
 int main() {
+  srand(time(NULL));
   vector<vehicle> race_rez;
   vector<vehicle> cars;
   int NumCircles;
@@ -329,14 +337,16 @@ int main() {
                 int exit=0;
                 if (find(skip_id.begin(), skip_id.end(), i) == skip_id.end()) 
                 {
-                  cars[i].mileage = cars[i].mileage + (cars[i].get_speed()*current_time);
-                  cars[i].current_mileage = cars[i].current_mileage +(cars[i].get_speed()*current_time);
+                  //cars[i].mileage = cars[i].mileage + (cars[i].get_speed()*current_time);
+                  cars[i].mileage_plus(current_time);
+                  //cars[i].current_mileage = cars[i].current_mileage +(cars[i].get_speed()*current_time);
+                  cars[i].current_mileage_plus(current_time);
                   for (int j = 0; j < cars[i].vec_wheels.size(); j++)
                   {
-                    cars[i].vec_wheels[j].def_wheel(cars[i].mileage,cars[i].get_speed());
+                    cars[i].vec_wheels[j].def_wheel(cars[i].get_mileage(),cars[i].get_speed());
                   }
                   cars[i].number_of_damaged_wheels();
-                  cars[i].calculate_cur_fuel(cars[i].calculateIntake(),cars[i].current_mileage);
+                  cars[i].calculate_cur_fuel(cars[i].calculateIntake(),cars[i].get_current_mileage());
                   cars[i].calculateSpeed();
                   cars[i].set_Time(current_time);
                   cars[i].time_display();
@@ -351,7 +361,7 @@ int main() {
                       exit=1;
                       cars[i].set_Time(current_time);
                   }
-                  if ((trackLen*NumCircles)-(cars[i].mileage)<=0) 
+                  if ((trackLen*NumCircles)-(cars[i].get_mileage())<=0) 
                   {
                     exit=1;
                     cars[i].set_Time(current_time);
@@ -599,7 +609,8 @@ void vehicle::reset()
      }
    damaged_wheels=0;
    current_mileage=mileage=0;
-   NRefuel=current_circles=0;
+   NRefuel=0;
+   current_circles=1;
    Time=0;
    current_fuel=TankCapacity;
    calculateSpeed();
@@ -615,7 +626,7 @@ int allfinished(vector<vehicle> &v,double trackLen,int circles)
   int count=0;
   for (int i=0;i<v.size();i++)
     {
-      if (v[i].current_mileage>=trackLen*circles)
+      if (v[i].get_current_mileage()-trackLen*circles>=0)
       {
         count++;
       }
