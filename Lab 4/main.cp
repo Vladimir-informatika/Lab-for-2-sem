@@ -24,7 +24,7 @@ public:
   wheel() {status=0;current_mileage=0;};
   virtual ~wheel(){};//требуется для корректной работы компилятора 
   void def_wheel(double mileage, double speed);
-  virtual void output();
+  void output();
   int get_status() { return status; }
   void set_status(int status) {
     this->status = status;
@@ -60,21 +60,19 @@ private:
   double NRefuel; //количесвто дозаправок
   double mileage; //пробег km
   double current_mileage;//текущее положение на круге km
+  int current_circles;
 public:
   vector<wheel> vec_wheels;
   string name;
-  int current_circles;
   double pit_stop_time;
   vehicle() {
     name = "ADDVEHICLE";
     Time = current_mileage=mileage = NRefuel = pit_stop_time = 0;
-    damaged_wheels=0;
-    current_circles=1;
+    damaged_wheels=current_circles=0;
   }
   vehicle(string vehicle_name, int wheels) {
     current_mileage=mileage=pit_stop_time=0;
-    damaged_wheels=0; 
-    current_circles=1;
+    damaged_wheels=current_circles=0; 
     name=vehicle_name;
     Nwheels=wheels;
     for (int i = 0; i < wheels; i++) {
@@ -102,7 +100,7 @@ public:
   {
     if (current_mileage-trackLen>=0)
     {
-      current_circles=current_circles+1;
+      current_circles=int(mileage/trackLen);
       current_mileage=0;
       return 1;
     }
@@ -129,10 +127,12 @@ public:
   int get_damaged_wheels(){return damaged_wheels;};
   double get_mileage(){return mileage;};
   void set_mileage(double len){this->mileage=len;};
-  void mileage_plus(double cur_time){this->mileage+=(speed*cur_time);};
+  void mileage_plus(){this->mileage+=(speed*dt);};
   double get_current_mileage(){return current_mileage;};
   void set_current_mileage(double len){this->current_mileage=len;};
-  void current_mileage_plus(double cur_time){this->current_mileage+=(speed*cur_time);};
+  void current_mileage_plus(){this->current_mileage+=(speed*dt);};
+  int get_current_circles(){return current_circles;};
+  void set_current_circles(int circles){this->current_circles=circles;};
   void calculateRefuel(double raceLength,int circles);
   void need_refuel(double tracklen);
   void need_change();
@@ -337,10 +337,8 @@ int main() {
                 int exit=0;
                 if (find(skip_id.begin(), skip_id.end(), i) == skip_id.end()) 
                 {
-                  //cars[i].mileage = cars[i].mileage + (cars[i].get_speed()*current_time);
-                  cars[i].mileage_plus(current_time);
-                  //cars[i].current_mileage = cars[i].current_mileage +(cars[i].get_speed()*current_time);
-                  cars[i].current_mileage_plus(current_time);
+                  cars[i].mileage_plus();
+                  cars[i].current_mileage_plus();
                   for (int j = 0; j < cars[i].vec_wheels.size(); j++)
                   {
                     cars[i].vec_wheels[j].def_wheel(cars[i].get_mileage(),cars[i].get_speed());
@@ -351,7 +349,7 @@ int main() {
                   cars[i].set_Time(current_time);
                   cars[i].time_display();
                   cout<<"car: "<<cars[i].name
-                    <<" circle: "<<cars[i].current_circles
+                    <<" circle: "<<cars[i].get_current_circles()+1
                     <<" speed: "<<cars[i].get_speed()<<"\n"
                     <<" Current fuel "<<cars[i].get_current_fuel()
                     <<" Damaged wheels: "<<cars[i].get_damaged_wheels()<<"\n"
@@ -365,7 +363,7 @@ int main() {
                   {
                     exit=1;
                     cars[i].set_Time(current_time);
-                    cars[i].current_circles=NumCircles;
+                    cars[i].set_current_circles(NumCircles);
                   }
                   if (exit==1)
                     {
@@ -445,7 +443,7 @@ void outputResults(vector<vehicle> v) {
   for (int i = 0; i < results.size(); i++) {
     cout << results[i].name << endl;
     results[i].time_display();
-    cout<<"Circles "<<results[i].current_circles<<endl;
+    cout<<"Circles "<<results[i].get_current_circles()<<endl;
     cout << "Refuel times: " << int(results[i].get_NRefuel()) << endl;
   }
 }
@@ -609,8 +607,7 @@ void vehicle::reset()
      }
    damaged_wheels=0;
    current_mileage=mileage=0;
-   NRefuel=0;
-   current_circles=1;
+   NRefuel=current_circles=0;
    Time=0;
    current_fuel=TankCapacity;
    calculateSpeed();
