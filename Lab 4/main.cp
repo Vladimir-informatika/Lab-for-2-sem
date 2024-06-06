@@ -34,7 +34,7 @@ public:
 class engine {
 protected:
   double engPow; //мощность двигателя HP horsepower
-  double engIntake; //потребление двигателя литров/км l/km
+  double engIntake; //потребление двигателя литров/км l/100km
 public:
  inline double calculateIntake() {return fabs(pow(engPow, 1 / 3) + sqrt(engPow) - 6.25);}
  engine(){engIntake=0;engPow=0;};
