@@ -577,7 +577,7 @@ void vehicle ::number_of_damaged_wheels()
 
 void vehicle ::need_refuel(double tracklen)
 {
-  if (current_fuel < (engIntake) * tracklen)
+  if (current_fuel < (engIntake*100) * tracklen)
   {
     this->plus_NRefuel();
     pit_stop_time+=this->refuel_time();
