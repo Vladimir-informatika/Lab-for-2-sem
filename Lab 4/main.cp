@@ -133,6 +133,7 @@ public:
   void current_mileage_plus(){this->current_mileage+=(speed*dt);};
   int get_current_circles(){return current_circles;};
   void set_current_circles(int circles){this->current_circles=circles;};
+  void current_circles_plus(){this->current_circles++;}
   void calculateRefuel(double raceLength,int circles);
   void need_refuel(double tracklen);
   void need_change();
@@ -358,12 +359,15 @@ int main() {
                   {
                       exit=1;
                       cars[i].set_Time(current_time);
+                      cars[i].current_circles_plus();
                   }
                   if ((trackLen*NumCircles)-(cars[i].get_mileage())<=0) 
                   {
                     exit=1;
                     cars[i].set_Time(current_time);
                     cars[i].set_current_circles(NumCircles);
+                    cars[i].time_display();
+                    cout<<""<<cars[i].name<<" just finished"<<endl;
                   }
                   if (exit==1)
                     {
@@ -409,6 +413,7 @@ void clean(int var) {
     cout << "\n";
   }
 }
+
 int menu(int &rez) {
   cout << "\nInter a number to choose action:\n";
   cout << "0 for exit\n";
@@ -459,6 +464,7 @@ double InputProve(double var) {
   }
   return var;
 }
+
 int InputProve(int var) {
   cin >> var;
   if (cin.fail() || var < 0) {
@@ -482,7 +488,7 @@ void wheel :: def_wheel(double mileage, double speed) {
   }
 }
 
-int wheel::check_status(double mileage, double speed) {
+/*int wheel::check_status(double mileage, double speed) {
   if (status == 0){
   double ratio = 1/(mileage*0.01)*sqrt(speed);
   if (ratio>=0.5)
@@ -497,14 +503,15 @@ int wheel::check_status(double mileage, double speed) {
   }
   }
   else return 1;
-}
-
-/*int wheel::check_status(double mileage, double speed) {
-  if (status == 0){ 
-  srand(time(0));
-  int ratio = ceil((1/(mileage*0.01)*sqrt(speed))));
-  int damageProb = (rand() % (ratio+5));
-  if (damageProb - ratio<=0) 
+}*/
+int wheel::check_status(double mileage, double speed) {
+  if (status == 0)
+  { 
+  int end = ceil(sqrt(mileage))+ceil(sqrt(speed));
+  int start=-1000;//компенсирую большое кол-во итераций
+  int ratio = ceil(((mileage)*(sqrt(speed)+1)));
+  int damageProb = rand() % (end - (start)+ratio)+start;
+  if (damageProb - end>=0) 
     {
       return 1;
     } 
@@ -512,9 +519,9 @@ int wheel::check_status(double mileage, double speed) {
     {
       return 0;
     }
-    }
+  }
   else return 1;
-}*/
+}
 void wheel ::output() {
   if (status == 1) {
     cout << "damaged" << endl;
@@ -543,7 +550,8 @@ void fuel_system ::def_fuel_system() {
 }
 
 
-void vehicle ::time_display() {
+void vehicle ::time_display() 
+{
   double t = this->Time;
   int hours = int(t);
   double cur_time = (t - hours) * 60;
@@ -552,16 +560,16 @@ void vehicle ::time_display() {
   cout << "TIME: " << setw(4)<<setfill('0')<<hours << ":" << setw(2)<<setfill('0')<<minutes << ":" << setw(2)<<setfill('0')<<seconds << endl;
 }
 
-void vehicle ::calculateSpeed() {
+void vehicle ::calculateSpeed() 
+{
   if (damaged_wheels == 0) {
-speed= double(fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0)));
+speed= double(fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) /sqrt(current_fuel)));
  }
  else
  {
-   speed = (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0))*(pow(0.75, double(damaged_wheels))));
+   speed = (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) / sqrt(current_fuel))*(pow(0.75, double(damaged_wheels))));
      }
-  }
-
+}
 
 void vehicle ::number_of_damaged_wheels() 
 {
@@ -599,6 +607,7 @@ void vehicle :: need_change()
       }
   }
 }
+
 void vehicle::reset()
  {
    for(int i=0;i<vec_wheels.size();i++)
