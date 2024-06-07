@@ -5,8 +5,6 @@
 using namespace std;
 
 
-
-
 class Wheel
 {
     double current_mileage;
@@ -15,7 +13,7 @@ public:
     Wheel();
     bool CheckStatus(double mileage, double speed);
     double DefWheel(double mileage, double speed);
-    int GetStatus();
+    bool GetStatus();
     virtual void Output();
 };
 Wheel::Wheel() {
@@ -23,7 +21,7 @@ Wheel::Wheel() {
     status = true;
 }
 bool Wheel::CheckStatus(double mileage, double speed) {
-    double ratio = 1 / (mileage * sqrt(speed));
+    double ratio = 1 / (mileage*sqrt(speed));
     if (ratio >= 0.5) return true;
     else return false;
 }
@@ -32,15 +30,15 @@ double Wheel::DefWheel(double mileage, double speed) {
     status = CheckStatus(mileage, speed);
     return current_mileage; ///////////////////////////////?????????????????????????????????????????????
 }
-int Wheel::GetStatus() {
+bool Wheel::GetStatus() {
     return status;
 }
 void Wheel::Output() {
     if (!status){
-        cout << "damaged" << endl;
+        cout << "Damaged" << endl;
     }
     else{
-        cout << "not damaged" << endl;
+        cout << "Not damaged" << endl;
     }
 }
 
@@ -63,6 +61,8 @@ Engine::Engine() {
     power = consumption = 0;
 }
 void Engine::DefEngine(double powerEn) {
+    cout << "Engine power in HP: ";
+    powerEn = InputProve(power);
     power = powerEn;
     consumption = Calculate_Consumption();
 }
@@ -71,7 +71,7 @@ void Engine::Output() {
     cout << "Consumption of engine: " << consumption << " l/100 km" << endl;
 }
 double Engine::Calculate_Consumption() {
-    return consump;//////////////////////////////////////////////////// formula
+    return fabs(pow(power, 1/3) + sqrt(power) - 6.25);//////////////////////////////////////////////////// formula
 }
 
 
@@ -93,11 +93,14 @@ Fuel_System::Fuel_System() {
     volume_tank = current_fuel = 0;
 }
 void Fuel_System::CalculateCurrentFuel(double consumption, double mileage, double refills) {
-    return formula; ///////////////////////////////////////////////
+    if (refills == 0) current_fuel = double(volume_tank - ((consumption / 100) * mileage));
+    else current_fuel = ((refills * volume_tank) - ((consumption / 100) * mileage));
 }
 void Fuel_System::DefFuelSystem(double capacity, double consumption, double mileage) {
     capacity = volume_tank;
-    //current_fuel = ... 
+    capacity = InputProve(capacity);
+    volume_tank = capacity;
+    current_fuel = capacity;
 }
 void Fuel_System::Output() {
     cout << "Fuel capacity: " << volume_tank << " l" << endl;
@@ -131,6 +134,7 @@ public:
     void TimeDisplay();
     int GetWheels();
     void NumberOfDamagedWheels();
+    inline void CalculateRaceTime(double distance);
     //тут дальше перегрузки и функции друзья с указателем на этот класс
     void Output();
     
@@ -153,11 +157,12 @@ Vehicle::Vehicle(string name_vehicle, int wheels) {
 }
 
 void Vehicle::CalculateSpeed() {
-    
+    if (damaged_wheels == 0) speed = double(fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5) * (current_fuel / 100.0)));
+    else speed = fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5) * (current_fuel / 100.0)) / (pow(2, double(damaged_wheels)));
 }
 
 void Vehicle::CalculateRefills(double distance) {
-
+    refills = floor((distance * (power / 100)) / volume_tank);
 }
 
 void Vehicle::TimeDisplay() {
@@ -169,7 +174,9 @@ int Vehicle::GetWheels() {
 }
 
 void Vehicle::NumberOfDamagedWheels() {
-
+    int count = 0;
+    for (int i = 0; i < count_wheels; i++) if (!wheel_ptr[i].GetStatus()) count++;
+    damaged_wheels = count;
 }
 
 void Vehicle::Output() {
@@ -177,8 +184,8 @@ void Vehicle::Output() {
     << "Damaged wheels: " << damaged_wheels << endl
     << "Speed: " << speed << " km/h" << endl
     << "Mileage: " << mileage << " km" << endl;
-    Engine:Output();
-    Fuel_System:Output();
+    Engine::Output();
+    Fuel_System::Output();
 }
 
 void Vehicle::SetName(string name_vehicle) {
@@ -203,6 +210,14 @@ double Vehicle::GetRefills() {
 
 double Vehicle::GetSpeed() {
     return speed;
+}
+
+Vehicle::~Vehicle() {
+    cout << "Destruct " << name << endl;
+}
+
+void Vehicle::CalculateRaceTime(double distance) {
+    time = (distance / speed);
 }
 
 
