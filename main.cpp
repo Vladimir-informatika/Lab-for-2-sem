@@ -343,14 +343,19 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
 {
     long double Radius = reg_pol[amount].length / (2 * sin(M_PI / (reg_pol[amount].count_sides)));
     long double alpha = 2 * M_PI / reg_pol[amount].count_sides;
+    long double phi;
+    long double Rx;
+    long double Ry;
+    long double O_x;
+    long double O_y;
 
     if ((reg_pol[amount].x[0] > 0) && (reg_pol[amount].y[0] > 0))
     {
-        long double phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
-        long double Rx = Radius*cos(phi);
-        long double Ry = Radius*sin(phi);
-        long double O_x = reg_pol[amount].x[0] - Rx;
-        long double O_y = reg_pol[amount].y[0] - Ry;
+        phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+         Rx = Radius*cos(phi);
+         Ry = Radius*sin(phi);
+         O_x = reg_pol[amount].x[0] - Rx;
+         O_y = reg_pol[amount].y[0] - Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
@@ -359,11 +364,11 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     }
     else if ((reg_pol[amount].x[0] < 0) && (reg_pol[amount].y[0] < 0))
     {
-        long double phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
-        long double Rx = Radius*cos(phi);
-        long double Ry = Radius*sin(phi);
-        long double O_x = reg_pol[amount].x[0] + Rx;
-        long double O_y = reg_pol[amount].y[0] + Ry;
+         phi = atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+         Rx = Radius*cos(phi);
+         Ry = Radius*sin(phi);
+         O_x = reg_pol[amount].x[0] + Rx;
+         O_y = reg_pol[amount].y[0] + Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x - Radius * cos(phi + i * alpha);
@@ -372,11 +377,11 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     }
     else if ((reg_pol[amount].x[0] < 0 ) && (reg_pol[amount].y[0] > 0))
     {
-        long double phi = M_PI/2 + atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
-        long double Rx = Radius*cos(phi);
-        long double Ry = Radius*sin(phi);
-        long double O_x = reg_pol[amount].x[0] + Rx;
-        long double O_y = reg_pol[amount].y[0] - Ry;
+         phi = M_PI/2 + atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+         Rx = Radius*cos(phi);
+         Ry = Radius*sin(phi);
+         O_x = reg_pol[amount].x[0] + Rx;
+         O_y = reg_pol[amount].y[0] - Ry;
 
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
@@ -386,11 +391,11 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     }
     else if ((reg_pol[amount].x[0] > 0) && (reg_pol[amount].y[0] < 0))
     {
-        long double phi = M_PI/2 + atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
-        long double Rx = Radius*cos(phi);
-        long double Ry = Radius*sin(phi);
-        long double O_x = reg_pol[amount].x[0] - Rx;
-        long double O_y = reg_pol[amount].y[0] + Ry;
+         phi = M_PI/2 + atan(reg_pol[amount].y[0]/reg_pol[amount].x[0]);
+         Rx = Radius*cos(phi);
+         Ry = Radius*sin(phi);
+         O_x = reg_pol[amount].x[0] - Rx;
+         O_y = reg_pol[amount].y[0] + Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x + Radius * cos(phi - i * alpha);
@@ -399,11 +404,11 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     }
     else if ((reg_pol[amount].x[0] == 0) && (reg_pol[amount].y[0] > 0))
     {
-        long double phi = M_PI/2;
-        long double Rx = 0;
-        long double Ry = Radius;
-        long double O_x = reg_pol[amount].x[0] - Rx;
-        long double O_y = reg_pol[amount].y[0] - Ry;
+         phi = M_PI/2;
+         Rx = 0;
+         Ry = Radius;
+         O_x = reg_pol[amount].x[0] - Rx;
+         O_y = reg_pol[amount].y[0] - Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
@@ -412,11 +417,11 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     }
     else if ((reg_pol[amount].x[0] == 0) && (reg_pol[amount].y[0] > 0))
     {
-        long double phi = M_PI/2;
-        long double Rx = 0;
-        long double Ry = Radius;
-        long double O_x = reg_pol[amount].x[0] - Rx;
-        long double O_y = reg_pol[amount].y[0] - Ry;
+         phi = M_PI/2;
+         Rx = 0;
+         Ry = Radius;
+         O_x = reg_pol[amount].x[0] - Rx;
+         O_y = reg_pol[amount].y[0] - Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
@@ -425,11 +430,11 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     }
     else if ((reg_pol[amount].x[0] == 0) && (reg_pol[amount].y[0] < 0))
     {
-        long double phi = -M_PI/2;
-        long double Rx = 0;
-        long double Ry = -Radius;
-        long double O_x = reg_pol[amount].x[0] - Rx;
-        long double O_y = reg_pol[amount].y[0] - Ry;
+         phi = -M_PI/2;
+         Rx = 0;
+         Ry = -Radius;
+         O_x = reg_pol[amount].x[0] - Rx;
+         O_y = reg_pol[amount].y[0] - Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x - Radius * cos(phi + i * alpha);
@@ -438,11 +443,12 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     }
     else if ((reg_pol[amount].x[0] > 0) && (reg_pol[amount].y[0] == 0))
     {
-        long double phi = 0;
-        long double Rx = Radius;
-        long double Ry = 0;
-        long double O_x = reg_pol[amount].x[0] - Rx;
-        long double O_y = reg_pol[amount].y[0] - Ry;
+         phi = 0;
+         Rx = Radius;
+         Ry = 0;
+         O_x = reg_pol[amount].x[0] - Rx;
+        cout << O_x << endl;
+         O_y = reg_pol[amount].y[0] - Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
@@ -451,11 +457,11 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
     }
     else if ((reg_pol[amount].x[0] < 0) && (reg_pol[amount].y[0] == 0))
     {
-        long double phi = M_PI;
-        long double Rx = -Radius;
-        long double Ry = 0;
-        long double O_x = reg_pol[amount].x[0] - Rx;
-        long double O_y = reg_pol[amount].y[0] - Ry;
+        phi = M_PI;
+        Rx = -Radius;
+        Ry = 0;
+        O_x = reg_pol[amount].x[0] - Rx;
+        O_y = reg_pol[amount].y[0] - Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
