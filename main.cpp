@@ -442,7 +442,6 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
         long double Rx = Radius;
         long double Ry = 0;
         long double O_x = reg_pol[amount].x[0] - Rx;
-        cout << O_x << endl;
         long double O_y = reg_pol[amount].y[0] - Ry;
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
