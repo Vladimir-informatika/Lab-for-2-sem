@@ -5,10 +5,11 @@
 using namespace std;
 
 
+
 class Transport
 {
     int count_wheels;
-    double mileage;
+  //  double mileage;
     double volume_tank;
     double power_engine;
     double travel_time;
@@ -18,7 +19,7 @@ class Transport
     int refills;
 public:
     Transport();
-    Transport(int countWheels, double mil, double volumeTank, double power, string str);
+    Transport(int countWheels, double volumeTank, double power, string str);
 
     double CalcEngineConsumption();
     double CalcSpeed();
@@ -28,15 +29,18 @@ public:
     void PrintRefillsAndTravelTime();
     double GetTravelTime();
     double GetRefills();
+    void Time_display();
 
     ~Transport();
 };
 
-
+Transport::~Transport() {
+    cout << "Transport " << name << " deleted!" << endl;
+}
 
 Transport::Transport() {
     count_wheels = 0;
-    mileage = 0;
+  //  mileage = 0;
     volume_tank = 0;
     power_engine = 0;
     name = "";
@@ -45,12 +49,11 @@ Transport::Transport() {
     engine_consumption = 0;
     refills = 0;
     travel_time = 0;
-    cout << "AddTransport!" << endl;
 }
 
-Transport::Transport(int countWheels, double mil, double volumeTank, double power, string str) {
+Transport::Transport(int countWheels, double volumeTank, double power, string str) {
     count_wheels = countWheels;
-    mileage = mil;
+   // mileage = mil;
     volume_tank = volumeTank;
     power_engine = power;
     name = str;
@@ -62,17 +65,16 @@ Transport::Transport(int countWheels, double mil, double volumeTank, double powe
 }
 
 double Transport::CalcSpeed() {
-    return power_engine * 3 / count_wheels;
+    return power_engine * 0.5 / count_wheels;
 }
 
 double Transport::CalcEngineConsumption() {
-    return power_engine * 0.064;
+    return power_engine * 0.5;
 }
 
 void Transport::CalcTravelTime(double distance) {
-    travel_time = 60 * distance / CalcSpeed();
+    travel_time = distance / CalcSpeed();
 }
-
 
 double Transport::GetTravelTime()
 {
@@ -80,28 +82,44 @@ double Transport::GetTravelTime()
 }
 
 void Transport::CalcRefills(double distance) {
-    refills = (int)floor(distance / (volume_tank * CalcEngineConsumption()));
-    mileage += distance;
+    refills = (int)floor(distance / (volume_tank
+                                     * CalcEngineConsumption()));
 }
 
 double Transport::GetRefills() {
     return refills;
 }
 
+void Transport::Time_display()
+{
+    int hours = (int) travel_time;
+    double tim = (travel_time - hours) * 60;
+    int minutes = (int)tim;
+    int seconds = int(tim - minutes) * 60;
+
+    if (hours < 24)
+    {
+        cout << hours << ":" << minutes << ":" << seconds << endl;
+    }
+    else
+    {
+        int days = (int) travel_time/24;
+        hours = int(travel_time  - days*24);
+        cout << days << " days " << hours << " hours " << minutes << " minutes " << seconds << " seconds" << endl;
+    }
+}
+
 void Transport::PrintRefillsAndTravelTime() {
-    cout << name << "\t\t" << refills << "\t\t" << floor(travel_time/60) << " hours " << floor(travel_time) - 60 * floor(travel_time/60) <<
-    " min " << floor(travel_time*60 - floor(travel_time)*60) << " sec" << endl;
+    cout << name << "\t\t" << refills << "\t\t";
+    Time_display();
 }
 
 void Transport::PrintData() {
     cout << name << endl;
     cout << "Count wheels: " << count_wheels << endl
-    << "Power engine: " << power_engine << " HP" << endl
-    << "Speed: " << speed << " kph" << endl
-    << "Engine consumption: " << engine_consumption << " l/100km" << endl << endl;
-}
-Transport::~Transport() {
-    cout << "Transport " << name << " deleted!" << endl;
+         << "Power engine: " << power_engine << endl
+         << "Speed: " << speed << endl
+         << "Engine consumption: " << engine_consumption << endl << endl;
 }
 
 
@@ -111,11 +129,10 @@ int Menu(); //Делаем меню
 Transport* AddTransport(Transport* vehicle, int amount); //Создаем и перезаписываем массив транспортов
 void SetData(Transport* transport, int quantity);  // Добавляем данные с консоли для нашего транспорта
 double Check(bool checker, double value); // Делаем проверку на отрицательность при вводе
-int Check(bool checker, int value);
 int StringReaderForInt(string value); //Конвертируем строку в целое число
 void Sort(Transport* vehicle, int amount); // Сортируем для 5 пункта меню
-double InputDouble(bool flagg);
-int InputInt(bool flagg);
+int InputValue(int var);
+double InputValue(double var);
 
 
 int main()
@@ -228,43 +245,33 @@ void SetData(Transport* transport, int quantity)
     string str;
     //Кол-во колес
     cout << "Input count of wheels: ";// количество колес;
-    int count_wheels_for_constr = InputInt(checker);
+    int count_wheels_for_constr = InputValue(count_wheels_for_constr);
 
 
     // Пробег
-    cout << "Input the mileage :"; //пробег;
-    double mileage_for_constr = InputDouble(checker);
+    //cout << "Input the mileage :"; //пробег;
+    //double mileage_for_constr = InputValue(mileage_for_constr);
 
     // Объём бака
     cout << "Input the volume of the tank :";  //объем бака;
-    double volume_tank_for_constr = InputDouble(checker);
+    double volume_tank_for_constr = InputValue(volume_tank_for_constr);
 
     cout << "Input the power of the engine :";   //мощность двигателя;
-    double power_engine_for_constr = InputDouble(checker);
+    double power_engine_for_constr = InputValue(power_engine_for_constr);
 
     cout << "Input the name of transport :";  //название.
     string name_for_constr;
     cin >> name_for_constr;
 
     //Конструктор нашего транспорта
-    transport[quantity] = Transport(count_wheels_for_constr, mileage_for_constr, volume_tank_for_constr, power_engine_for_constr, name_for_constr);
-    cout << endl;
+    transport[quantity] = Transport(count_wheels_for_constr, volume_tank_for_constr, power_engine_for_constr, name_for_constr);
+    cout << endl << "Transport added!" << endl;
 }
 
 // Делаем проверку на отрицательность при вводе
 double Check(bool checker, double value) {
     if (value <= 0) checker = false;
     while (!checker){
-        cout << "Incorrect, try again! Value must be greater than 0!";
-        cin >> value;
-        if (value > 0) checker = true;
-    }
-    cout << endl;
-    return value;
-}
-int Check(bool checker, int value) {
-    if (value < 1) checker = false;
-    while (!checker) {
         cout << "Incorrect, try again! Value must be greater than 0!";
         cin >> value;
         if (value > 0) checker = true;
@@ -281,7 +288,7 @@ int StringReaderForInt(string value)
     {
         if ((int(value[i]) > 47) && (int(value[i]) < 58))
         {
-            choice += (int(value[i])-48) * pow(10, i) ;
+            choice += (int(value[i]) - 48) * pow(10, i) ;
         }
     }
     return choice;
@@ -312,20 +319,33 @@ void Sort(Transport* vehicle, int amount)
     }
 }
 
-double InputDouble(bool flagg)
+int InputValue(int var)
 {
-    double value = 0;
-    cin >> value;
-    value = Check(flagg, value);
-    cout << endl;
-    return value;
+    cin >> var;
+    if(cin.fail() || var <= 0)
+    {
+        while (!(cin >> var) || var <= 0)
+        {
+            cout << "Incorrect, try again!" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize> :: max(), '\n');
+        }
+    }
+    return var;
 }
 
-int InputInt(bool flagg)
+double InputValue(double var)
 {
-    int value = 0;
-    cin >> value;
-    value = Check(flagg, value);
-    cout << endl;
-    return value;
+    cin >> var;
+    if(cin.fail() || var <= 0)
+    {
+        while (!(cin >> var) || var <= 0)
+        {
+            cout << "Incorrect, try again!" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize> :: max(), '\n');
+        }
+    }
+    return var;
 }
+
