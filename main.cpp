@@ -169,62 +169,62 @@ void menu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     int choose = 0;
     //int choose = int(choice)-48;
     for (int i = 0; i < choice.length(); i++)
+    {
+        if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
         {
-            if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
-            {
-                choose += int(choice[i])-48;
-            }
+            choose += int(choice[i])-48;
         }
+    }
     cout << '\n';
     switch (choose)
     {
-    case 1:
-        OurPolygon = AddStruct(OurPolygon, PolygonAmount);
-        output = AddOutput(PolygonAmount, output);
-        SetData(OurPolygon, PolygonAmount, output);
-        PolygonAmount++;
-        break;
-    case 2:
-        cout << '\n';
+        case 1:
+            OurPolygon = AddStruct(OurPolygon, PolygonAmount);
+            output = AddOutput(PolygonAmount, output);
+            SetData(OurPolygon, PolygonAmount, output);
+            PolygonAmount++;
+            break;
+        case 2:
+            cout << '\n';
 
-        cout << "OK, let's look" << '\n';
-        print(OurPolygon, PolygonAmount, output);
-        break;
-    case 3:
-        cout << "Which polygon you want to delete? Input the sequence number:" << '\n';
-        cin >> chosenForDelete;
-        if (chosenForDelete > PolygonAmount)
-        {
-            cout << "There is no such polygon yet :( " << '\n';
-        }
-        else if (chosenForDelete < 1)
-        {
-            cout << "Error: try again! " << '\n';
-        }
-
-        else
-        {
-            if (output[chosenForDelete - 1] == 0)
+            cout << "OK, let's look" << '\n';
+            print(OurPolygon, PolygonAmount, output);
+            break;
+        case 3:
+            cout << "Which polygon you want to delete? Input the sequence number:" << '\n';
+            cin >> chosenForDelete;
+            if (chosenForDelete > PolygonAmount)
             {
-                cout << "This polygon is deleted!" << endl;
+                cout << "There is no such polygon yet :( " << '\n';
             }
+            else if (chosenForDelete < 1)
+            {
+                cout << "Error: try again! " << '\n';
+            }
+
             else
             {
-                cout << "As you wish" << '\n';
-                output[chosenForDelete - 1] = 0;
+                if (output[chosenForDelete - 1] == 0)
+                {
+                    cout << "This polygon is deleted!" << endl;
+                }
+                else
+                {
+                    cout << "As you wish" << '\n';
+                    output[chosenForDelete - 1] = 0;
+                }
             }
-        }
-        break;
-    case 4:
-        submenu(OurPolygon, PolygonAmount, output);
-        break;
-    case 5:
-        check(OurPolygon, PolygonAmount, output);
-        return;
-        break;
-    default:
-        cout << "Incorrect! Try again" << '\n';
-        break;
+            break;
+        case 4:
+            submenu(OurPolygon, PolygonAmount, output);
+            break;
+        case 5:
+            check(OurPolygon, PolygonAmount, output);
+            return;
+            break;
+        default:
+            cout << "Incorrect! Try again" << '\n';
+            break;
     }
     menu(OurPolygon, PolygonAmount, output);
     return;
@@ -272,25 +272,25 @@ void check(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     cin >> choice;
     int k = 0;
     for (int i = 0; i < choice.length(); i++)
+    {
+        if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
         {
-            if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
-            {
-                k += int(choice[i])-48;
-            }
+            k += int(choice[i])-48;
         }
+    }
     cout << '\n';
     switch (k)
     {
-    case 1:
-        return;
-        break;
-    case 0:
-        menu(OurPolygon, PolygonAmount, output);
-        break;
-    default:
-        cout << "Incorrect! Try again" << '\n';
-        check(OurPolygon, PolygonAmount, output);
-        break;
+        case 1:
+            return;
+            break;
+        case 0:
+            menu(OurPolygon, PolygonAmount, output);
+            break;
+        default:
+            cout << "Incorrect! Try again" << '\n';
+            check(OurPolygon, PolygonAmount, output);
+            break;
     }
     return;
 }
@@ -305,33 +305,33 @@ void submenu(regular_polygon* OurPolygon, int PolygonAmount, int* output)
     cin >> choice;
     int l = 0;
     for (int i = 0; i < choice.length(); i++)
+    {
+        if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
         {
-            if ((int(choice[i]) > 47) && (int(choice[i]) < 58))
-            {
-                l += int(choice[i])-48;
-            }
+            l += int(choice[i])-48;
         }
+    }
     cout << '\n';
 
     switch (l)
     {
-    case 1:
-        cout << "Let's look" << endl << "-----------------------" << endl;
-        square_perimeter(l , OurPolygon, PolygonAmount, output);
-        cout << "That's all" << '\n';
-        break;
-    case 2:
-        cout << "Let's look" << endl << "-----------------------" << endl;
-        square_perimeter(l , OurPolygon, PolygonAmount, output);
-        cout << "That's all" << '\n';
+        case 1:
+            cout << "Let's look" << endl << "-----------------------" << endl;
+            square_perimeter(l , OurPolygon, PolygonAmount, output);
+            cout << "That's all" << '\n';
+            break;
+        case 2:
+            cout << "Let's look" << endl << "-----------------------" << endl;
+            square_perimeter(l , OurPolygon, PolygonAmount, output);
+            cout << "That's all" << '\n';
 
-        break;
-    case 3:
-        break;
-    default:
-        cout << "Incorrect! Try again" << '\n';
-        submenu(OurPolygon, PolygonAmount, output);
-        break;
+            break;
+        case 3:
+            break;
+        default:
+            cout << "Incorrect! Try again" << '\n';
+            submenu(OurPolygon, PolygonAmount, output);
+            break;
     }
     return;
 }
@@ -377,6 +377,7 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
         long double Ry = Radius*sin(phi);
         long double O_x = reg_pol[amount].x[0] + Rx;
         long double O_y = reg_pol[amount].y[0] - Ry;
+
         for (int i = 1; i < reg_pol[amount].count_sides; i++)
         {
             reg_pol[amount].x[i] = O_x - Radius * cos(phi - i * alpha);
@@ -396,9 +397,74 @@ void coordinates(struct regular_polygon* reg_pol, int amount)
             reg_pol[amount].y[i] = O_y - Radius * sin(phi - i * alpha);
         }
     }
-
-    return;
+    else if ((reg_pol[amount].x[0] == 0) && (reg_pol[amount].y[0] > 0))
+    {
+        long double phi = M_PI/2;
+        long double Rx = 0;
+        long double Ry = Radius;
+        long double O_x = reg_pol[amount].x[0] - Rx;
+        long double O_y = reg_pol[amount].y[0] - Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
+            reg_pol[amount].y[i] = O_y + Radius * sin(phi + i * alpha);
+        }
+    }
+    else if ((reg_pol[amount].x[0] == 0) && (reg_pol[amount].y[0] > 0))
+    {
+        long double phi = M_PI/2;
+        long double Rx = 0;
+        long double Ry = Radius;
+        long double O_x = reg_pol[amount].x[0] - Rx;
+        long double O_y = reg_pol[amount].y[0] - Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
+            reg_pol[amount].y[i] = O_y + Radius * sin(phi + i * alpha);
+        }
+    }
+    else if ((reg_pol[amount].x[0] == 0) && (reg_pol[amount].y[0] < 0))
+    {
+        long double phi = -M_PI/2;
+        long double Rx = 0;
+        long double Ry = -Radius;
+        long double O_x = reg_pol[amount].x[0] - Rx;
+        long double O_y = reg_pol[amount].y[0] - Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x - Radius * cos(phi + i * alpha);
+            reg_pol[amount].y[i] = O_y - Radius * sin(phi + i * alpha);
+        }
+    }
+    else if ((reg_pol[amount].x[0] > 0) && (reg_pol[amount].y[0] == 0))
+    {
+        long double phi = 0;
+        long double Rx = Radius;
+        long double Ry = 0;
+        long double O_x = reg_pol[amount].x[0] - Rx;
+        cout << O_x << endl;
+        long double O_y = reg_pol[amount].y[0] - Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
+            reg_pol[amount].y[i] = O_y + Radius * sin(phi + i * alpha);
+        }
+    }
+    else if ((reg_pol[amount].x[0] < 0) && (reg_pol[amount].y[0] == 0))
+    {
+        long double phi = M_PI;
+        long double Rx = -Radius;
+        long double Ry = 0;
+        long double O_x = reg_pol[amount].x[0] - Rx;
+        long double O_y = reg_pol[amount].y[0] - Ry;
+        for (int i = 1; i < reg_pol[amount].count_sides; i++)
+        {
+            reg_pol[amount].x[i] = O_x + Radius * cos(phi + i * alpha);
+            reg_pol[amount].y[i] = O_y + Radius * sin(phi + i * alpha);
+        }
+    }
 }
+
 void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount, int* output)
 {
     int i_max = 0;
@@ -410,7 +476,7 @@ void square_perimeter(int k ,struct regular_polygon* reg_pol, int amount, int* o
     }
     if (k == 1) for (int i = 0; i < amount; i++) sq_per[i] = reg_pol[i].square; // записываем туда площади
     else for (int i = 0; i < amount; i++) sq_per[i] = reg_pol[i].perimeter;  //  записываем периметры
-    //прооняем условие и выполняем
+    //прогоняем условие и выполняем
     for (int j = 0; j < amount; j++)
         if (((sq_per[j] - sq_per[i_max]) > 0) && (output[j] == 1)) i_max = j;
     for (int p = i_max; p < amount; p++)
