@@ -4,6 +4,7 @@
 
 using namespace std;
 
+//доделать меню, сделать все как надо. Переопределить некоторые методы, которые были щадекларированы во второй лабе
 
 class Wheel
 {
@@ -119,7 +120,7 @@ class Vehicle : public Engine, public Fuel_System
     double mileage;
     int refills;
 public:
-    Wheel * wheel_ptr;
+    Wheel* wheel_ptr;
     string name;
     Vehicle();
     Vehicle(string name_vehicle, int wheels);
@@ -135,9 +136,9 @@ public:
     int GetWheels();
     void NumberOfDamagedWheels();
     inline void CalculateRaceTime(double distance);
-    //тут дальше перегрузки и функции друзья с указателем на этот класс
     void Output();
-    
+    friend Vehicle* RacingResults(Vehicle *&transp, int quantity);
+    friend void OutputResult(Vehicle *&transp, int quantity);
     ~Vehicle();
 };
 Vehicle::Vehicle() {
@@ -166,7 +167,21 @@ void Vehicle::CalculateRefills(double distance) {
 }
 
 void Vehicle::TimeDisplay() {
+    int hours = (int) travel_time;
+    double tim = (travel_time - hours) * 60;
+    int minutes = (int)tim;
+    int seconds = int(tim - minutes) * 60;
 
+    if (hours < 24)
+    {
+        cout << hours << ":" << minutes << ":" << seconds << endl;
+    }
+    else
+    {
+        int days = (int) travel_time/24;
+        hours = int(travel_time  - days*24);
+        cout << days << " days " << hours << " hours " << minutes << " minutes " << seconds << " seconds" << endl;
+    }
 }
 
 int Vehicle::GetWheels() {
@@ -309,7 +324,21 @@ void Vehicle::CalculateRaceTime(double distance) {
 //}
 //
 //void Transport::PrintRefillsAndTravelTime() {
-//    cout << name << "\t\t" << refills << "\t\t" << travel_time << endl;
+//        int hours = (int) travel_time;
+//    double tim = (travel_time - hours) * 60;
+//    int minutes = (int)tim;
+//    int seconds = int(tim - minutes) * 60;
+//
+//    if (hours < 24)
+//    {
+//        cout << hours << ":" << minutes << ":" << seconds << endl;
+//    }
+//    else
+//    {
+//        int days = (int) travel_time/24;
+//        hours = int(travel_time  - days*24);
+//        cout << days << " days " << hours << " hours " << minutes << " minutes " << seconds << " seconds" << endl;
+//    }
 //}
 //
 //void Transport::PrintData() {
@@ -352,16 +381,16 @@ void Vehicle::CalculateRaceTime(double distance) {
 
 
 
-
+Vehicle* RacingResults(Vehicle *&transp, int quantity);
 int Menu(); //Делаем меню
 Transport* AddTransport(Transport* vehicle, int amount); //Создаем и перезаписываем массив транспортов
 void SetData(Transport* transport, int quantity);  // Добавляем данные с консоли для нашего транспорта
 double Check(bool checker, double value); // Делаем проверку на отрицательность при вводе
-int Check(bool checker, int value);
 int StringReaderForInt(string value); //Конвертируем строку в целое число
 void Sort(Transport* vehicle, int amount); // Сортируем для 5 пункта меню
-double InputDouble(bool flagg);
-int InputInt(bool flagg);
+int InputValue(int var);
+double InputValue(double var);
+
 
 
 int main()
@@ -433,6 +462,42 @@ int main()
         }
     }
 }
+
+// Функции друзья
+
+Vehicle* RacingResults(Vehicle *&transp, int quantity)
+{
+    Vehicle* result = new Vehicle[quantity];
+    Vehicle* temp = new Vehicle[quantity];
+    for (int i = 0; i < quantity; i++) {
+        result[i] = transp[i];
+    }
+    for (int i = 0; i < quantity; i++) {
+        for (int j = 0; j < quantity; j++) {
+            if ((result[i].GetTime()- result[j].GetTime() < 0) &&
+                (result[i].GetRefills() - result[i].GetRefills() <= 0)) {
+                temp[0] = result[i];
+                result[i] = result[j];
+                result[j] = temp[0];
+            }
+        }
+    }
+    delete[] temp;
+    return result;
+}
+
+void OutputResult(Vehicle *&transp, int quantity)
+{
+    Vehicle *results = RacingResults(transp,quantity);
+    for (int i = 0; i < quantity; i++) {
+        cout << results[i].name << endl;
+        results[i].TimeDisplay();
+        cout << "Refuel times: " << int(results[i].refills) << endl;
+    }
+    delete[] results;
+}
+
+
 
 // Консольное меню
 int Menu ()
@@ -539,7 +604,7 @@ void Sort(Transport* vehicle, int amount)
     {
         for (int j = 0; j < amount; j++)
         {
-            if (vehicle[i].GetTravelTime() > vehicle[j].GetTravelTime()) 
+            if (vehicle[i].GetTravelTime() > vehicle[j].GetTravelTime())
             {
                 Transport temporary = vehicle[i];
                 vehicle[i] = vehicle[j];
@@ -558,20 +623,33 @@ void Sort(Transport* vehicle, int amount)
     }
 }
 
-double InputDouble(bool flagg)
+
+int InputValue(int var)
 {
-    double value = 0;
-    cin >> value;
-    value = Check(flagg, value);
-    cout << endl;
-    return value;
+    cin >> var;
+    if(cin.fail() || var <= 0)
+    {
+        while (!(cin >> var) || var <= 0)
+        {
+            cout << "Incorrect, try again!" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize> :: max(), '\n');
+        }
+    }
+    return var;
 }
 
-int InputInt(bool flagg)
+double InputValue(double var)
 {
-    int value = 0;
-    cin >> value;
-    value = Check(flagg, value);
-    cout << endl;
-    return value;
+    cin >> var;
+    if(cin.fail() || var <= 0)
+    {
+        while (!(cin >> var) || var <= 0)
+        {
+            cout << "Incorrect, try again!" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize> :: max(), '\n');
+        }
+    }
+    return var;
 }
