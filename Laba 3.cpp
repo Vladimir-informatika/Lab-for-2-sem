@@ -6,6 +6,12 @@ using namespace std;
 
 //доделать меню, сделать все как надо. Переопределить некоторые методы, которые были щадекларированы во второй лабе
 
+
+//Красивее вывод результатов гонки селать. Также вывод (меню 2)
+
+int InputValue(int var);
+double InputValue(double var);
+
 class Wheel
 {
     double current_mileage;
@@ -45,7 +51,6 @@ void Wheel::Output() {
 
 
 
-
 class Engine
 {
 protected:
@@ -63,7 +68,7 @@ Engine::Engine() {
 }
 void Engine::DefEngine(double powerEn) {
     cout << "Engine power in HP: ";
-    powerEn = InputProve(power);
+    powerEn = InputValue(power);
     power = powerEn;
     consumption = Calculate_Consumption();
 }
@@ -74,8 +79,6 @@ void Engine::Output() {
 double Engine::Calculate_Consumption() {
     return fabs(pow(power, 1/3) + sqrt(power) - 6.25);//////////////////////////////////////////////////// formula
 }
-
-
 
 
 
@@ -99,7 +102,8 @@ void Fuel_System::CalculateCurrentFuel(double consumption, double mileage, doubl
 }
 void Fuel_System::DefFuelSystem(double capacity, double consumption, double mileage) {
     capacity = volume_tank;
-    capacity = InputProve(capacity);
+    cout << "Input Volume Tank in l:";
+    capacity = InputValue(capacity);
     volume_tank = capacity;
     current_fuel = capacity;
 }
@@ -110,8 +114,7 @@ void Fuel_System::Output() {
 
 
 
-
-class Vehicle : public Engine, public Fuel_System
+class Transports : public Engine, public Fuel_System
 {
     int count_wheels;
     double speed;
@@ -122,10 +125,10 @@ class Vehicle : public Engine, public Fuel_System
 public:
     Wheel* wheel_ptr;
     string name;
-    Vehicle();
-    Vehicle(string name_vehicle, int wheels);
+    Transports();
+    Transports(string name_Transports, int wheels);
     void CalculateSpeed();
-    void SetName(string name_vehicle);
+    void SetName(string name_Transports);
     void SetWheels(int countWheels);
     void SetMileage(double distance);
     double GetTime();
@@ -137,18 +140,18 @@ public:
     void NumberOfDamagedWheels();
     inline void CalculateRaceTime(double distance);
     void Output();
-    friend Vehicle* RacingResults(Vehicle *&transp, int quantity);
-    friend void OutputResult(Vehicle *&transp, int quantity);
-    ~Vehicle();
+    friend Transports* RacingResults(Transports *&transp, int quantity);
+    friend void OutputResult(Transports *&transp, int quantity);
+    ~Transports();
 };
-Vehicle::Vehicle() {
-    name = "AddVehicle";
+Transports::Transports() {
+    name = "AddTransports";
     time = mileage = refills = damaged_wheels = 0;
     wheel_ptr = nullptr;
 }
-Vehicle::Vehicle(string name_vehicle, int wheels) {
+Transports::Transports(string name_Transports, int wheels) {
     mileage = damaged_wheels = 0;
-    SetName(name_vehicle);
+    SetName(name_Transports);
     SetWheels(wheels);
     wheel_ptr = new Wheel[wheels];
     for (int i = 0; i < wheels; i++) wheel_ptr[i] = Wheel();
@@ -157,18 +160,18 @@ Vehicle::Vehicle(string name_vehicle, int wheels) {
     CalculateSpeed();
 }
 
-void Vehicle::CalculateSpeed() {
+void Transports::CalculateSpeed() {
     if (damaged_wheels == 0) speed = double(fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5) * (current_fuel / 100.0)));
     else speed = fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5) * (current_fuel / 100.0)) / (pow(2, double(damaged_wheels)));
 }
 
-void Vehicle::CalculateRefills(double distance) {
+void Transports::CalculateRefills(double distance) {
     refills = floor((distance * (power / 100)) / volume_tank);
 }
 
-void Vehicle::TimeDisplay() {
-    int hours = (int) travel_time;
-    double tim = (travel_time - hours) * 60;
+void Transports::TimeDisplay() {
+    int hours = (int) time;
+    double tim = (time - hours) * 60;
     int minutes = (int)tim;
     int seconds = int(tim - minutes) * 60;
 
@@ -178,23 +181,23 @@ void Vehicle::TimeDisplay() {
     }
     else
     {
-        int days = (int) travel_time/24;
-        hours = int(travel_time  - days*24);
+        int days = (int) time/24;
+        hours = int(time  - days*24);
         cout << days << " days " << hours << " hours " << minutes << " minutes " << seconds << " seconds" << endl;
     }
 }
 
-int Vehicle::GetWheels() {
+int Transports::GetWheels() {
     return count_wheels;
 }
 
-void Vehicle::NumberOfDamagedWheels() {
+void Transports::NumberOfDamagedWheels() {
     int count = 0;
     for (int i = 0; i < count_wheels; i++) if (!wheel_ptr[i].GetStatus()) count++;
     damaged_wheels = count;
 }
 
-void Vehicle::Output() {
+void Transports::Output() {
     cout << "Count wheels: " << count_wheels << endl
     << "Damaged wheels: " << damaged_wheels << endl
     << "Speed: " << speed << " km/h" << endl
@@ -203,35 +206,35 @@ void Vehicle::Output() {
     Fuel_System::Output();
 }
 
-void Vehicle::SetName(string name_vehicle) {
-    name = name_vehicle;
+void Transports::SetName(string name_Transports) {
+    name = name_Transports;
 }
 
-void Vehicle::SetWheels(int countWheels) {
+void Transports::SetWheels(int countWheels) {
     count_wheels = countWheels;
 }
 
-void Vehicle::SetMileage(double distance) {
+void Transports::SetMileage(double distance) {
     mileage = distance;
 }
 
-double Vehicle::GetTime() {
+double Transports::GetTime() {
     return time;
 }
 
-double Vehicle::GetRefills() {
+double Transports::GetRefills() {
     return refills;
 }
 
-double Vehicle::GetSpeed() {
+double Transports::GetSpeed() {
     return speed;
 }
 
-Vehicle::~Vehicle() {
+Transports::~Transports() {
     cout << "Destruct " << name << endl;
 }
 
-void Vehicle::CalculateRaceTime(double distance) {
+void Transports::CalculateRaceTime(double distance) {
     time = (distance / speed);
 }
 
@@ -350,63 +353,32 @@ void Vehicle::CalculateRaceTime(double distance) {
 //}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Vehicle* RacingResults(Vehicle *&transp, int quantity);
+Transports* RacingResults(Transports *&transp, int quantity);
 int Menu(); //Делаем меню
-Transport* AddTransport(Transport* vehicle, int amount); //Создаем и перезаписываем массив транспортов
-void SetData(Transport* transport, int quantity);  // Добавляем данные с консоли для нашего транспорта
-double Check(bool checker, double value); // Делаем проверку на отрицательность при вводе
+Transports* AddTransport(Transports* Transports, int amount); //Создаем и перезаписываем массив транспортов
+void SetData(Transports* transport, int quantity);  // Добавляем данные с консоли для нашего транспорта
 int StringReaderForInt(string value); //Конвертируем строку в целое число
-void Sort(Transport* vehicle, int amount); // Сортируем для 5 пункта меню
-int InputValue(int var);
-double InputValue(double var);
+void Sort(Transports* Transports, int amount); // Сортируем для 5 пункта меню
 
 
 
 int main()
 {
-    Transport* transport;
+    Transports* transports = nullptr;
+
+
     int quantity = 0;
     double distance = 0;
+
     bool flag = false;
     bool menu = true;
-    bool checker_for_route = true;
+
     while (menu) {
         int k = Menu();
         switch (k) {
             case 1:
-                transport = AddTransport(transport, quantity);
-                SetData(transport, quantity);
+                transports = AddTransport(transports, quantity);
+                SetData(transports, quantity);
                 quantity++;
                 break;
             case 2:
@@ -414,23 +386,28 @@ int main()
                 {
                     cout << "Julius Sergeevich, you didn't add any transport. What did you expected to see?" << endl;
                 }
-                else for (int i = 0; i < quantity; i ++) transport[i].PrintData();
+                else for (int i = 0; i < quantity; i ++) transports[i].Output();
                 break;
             case 3:
                 cout << "Input/change route length: ";
-                cin >> distance;
-                Check(checker_for_route, distance);
+                distance = InputValue(distance);
                 flag = false;
                 break;
             case 4:
                 if (quantity == 0 || distance == 0) {
                     cout << "Array of transport is empty or distance is null\n";
                 }
-                else
-                {
+                else {
                     for (int i = 0; i < quantity; i++) {
-                        transport[i].CalcRefills(distance);
-                        transport[i].CalcTravelTime(distance);
+                        transports[i].CalculateRaceTime(distance);
+                        transports[i].SetMileage(distance);
+                        for (int j = 0; j < transports[i].GetWheels(); j++) {
+                            transports[i].wheel_ptr[j].DefWheel(distance, transports[i].GetSpeed());
+                        }
+                        transports[i].NumberOfDamagedWheels();
+                        transports[i].CalculateRefills(distance);
+                        transports[i].CalculateCurrentFuel(transports[i].Calculate_Consumption(), distance, transports[i].GetRefills());
+                        transports[i].CalculateSpeed();
                     }
                     flag = true;
                     cout << "Calculating...\n";
@@ -440,10 +417,11 @@ int main()
                 if (!flag) {
                     cout << "No-no-no! Firstly calculate THESE routes for each transport! Have you just changed distance and didn't calculate it for each transport?" << endl;
                 }
-                else {
-                    Sort(transport, quantity);
-                    cout << "Name\t\tRefills\t\tTravel time\n";
-                    for (int i = 0; i < quantity; i++) transport[i].PrintRefillsAndTravelTime();
+                else{
+//                    Sort(transports, quantity);
+//                    cout << "Name\t\tRefills\t\tTravel time\n";
+//                    for (int i = 0; i < quantity; i++) transports[i].();
+                    OutputResult(transports, quantity);
                 }
                 break;
             case 6:
@@ -465,17 +443,16 @@ int main()
 
 // Функции друзья
 
-Vehicle* RacingResults(Vehicle *&transp, int quantity)
+Transports* RacingResults(Transports *&transp, int quantity)
 {
-    Vehicle* result = new Vehicle[quantity];
-    Vehicle* temp = new Vehicle[quantity];
+    Transports* result = new Transports[quantity];
+    Transports* temp = new Transports[quantity];
     for (int i = 0; i < quantity; i++) {
         result[i] = transp[i];
     }
     for (int i = 0; i < quantity; i++) {
         for (int j = 0; j < quantity; j++) {
-            if ((result[i].GetTime()- result[j].GetTime() < 0) &&
-                (result[i].GetRefills() - result[i].GetRefills() <= 0)) {
+            if ((result[i].GetTime()- result[j].GetTime() < 0) && (result[i].GetRefills() - result[i].GetRefills() <= 0)) {
                 temp[0] = result[i];
                 result[i] = result[j];
                 result[j] = temp[0];
@@ -486,9 +463,9 @@ Vehicle* RacingResults(Vehicle *&transp, int quantity)
     return result;
 }
 
-void OutputResult(Vehicle *&transp, int quantity)
+void OutputResult(Transports *&transp, int quantity)
 {
-    Vehicle *results = RacingResults(transp,quantity);
+    Transports *results = RacingResults(transp,quantity);
     for (int i = 0; i < quantity; i++) {
         cout << results[i].name << endl;
         results[i].TimeDisplay();
@@ -519,70 +496,52 @@ int Menu ()
 }
 
 //Создаем и перезаписываем массив транспортов
-Transport* AddTransport(Transport* vehicle, int amount)
+Transports* AddTransport(Transports* transports, int amount)
 {
-    if (amount == 0) vehicle = new Transport[amount+1];
+    if (amount == 0) transports = new Transports[amount+1];
     else
     {
-        Transport* temp = new Transport[amount + 1];
-        for (int i = 0; i < amount; i++) temp[i] = vehicle[i];
-        delete[] vehicle;
-        vehicle = temp;
+        Transports* temp = new Transports[amount + 1];
+        for (int i = 0; i < amount; i++) temp[i] = transports[i];
+        delete[] transports;
+        transports = temp;
     }
-    return vehicle;
+    return transports;
 }
 
 // Добавляем данные с консоли для нашего транспорта
-void SetData(Transport* transport, int quantity)
+void SetData(Transports* transport, int quantity)
 {
-    bool checker = true;
-    string str;
     //Кол-во колес
-    cout << "Input count of wheels: ";// количество колес;
-    int count_wheels_for_constr = InputInt(checker);
 
+    cout << "Input count of wheels: ";// количество колес;
+    int count_wheels_for_constr = InputValue(count_wheels_for_constr);
 
     // Пробег
-    cout << "Input the mileage :"; //пробег;
-    double mileage_for_constr = InputDouble(checker);
 
-    // Объём бака
-    cout << "Input the volume of the tank :";  //объем бака;
-    double volume_tank_for_constr = InputDouble(checker);
 
-    cout << "Input the power of the engine :";   //мощность двигателя;
-    double power_engine_for_constr = InputDouble(checker);
+//    cout << "Input the mileage :"; //пробег;
+//    double mileage_for_constr = InputValue(mileage_for_constr);
+//
+//    // Объём бака
+//
+//    cout << "Input the volume of the tank :";  //объем бака;
+//    double volume_tank_for_constr = InputValue(volume_tank_for_constr);
+//
+//    cout << "Input the power of the engine :";   //мощность двигателя;
+//    double power_engine_for_constr = InputValue(power_engine_for_constr);
+
 
     cout << "Input the name of transport :";  //название.
     string name_for_constr;
     cin >> name_for_constr;
 
     //Конструктор нашего транспорта
-    transport[quantity] = Transport(count_wheels_for_constr, mileage_for_constr, volume_tank_for_constr, power_engine_for_constr, name_for_constr);
+    transport[quantity] = Transports(name_for_constr, count_wheels_for_constr);
     cout << endl << "Transport added!" << endl;
 }
 
-// Делаем проверку на отрицательность при вводе
-double Check(bool checker, double value) {
-    if (value <= 0) checker = false;
-    while (!checker){
-        cout << "Incorrect, try again! Value must be greater than 0!";
-        cin >> value;
-        if (value > 0) checker = true;
-    }
-    cout << endl;
-    return value;
-}
-int Check(bool checker, int value) {
-    if (value < 1) checker = false;
-    while (!checker) {
-        cout << "Incorrect, try again! Value must be greater than 0!";
-        cin >> value;
-        if (value > 0) checker = true;
-    }
-    cout << endl;
-    return value;
-}
+
 
 //Конвертируем строку в целое число
 int StringReaderForInt(string value)
@@ -590,39 +549,36 @@ int StringReaderForInt(string value)
     int choice = 0;
     for (int i = 0; i < value.length(); i++)
     {
-        if ((int(value[i]) > 47) && (int(value[i]) < 58))
-        {
-            choice += (int(value[i])-48) * pow(10, i) ;
-        }
+        if ((int(value[i]) > 47) && (int(value[i]) < 58)) choice += (int(value[i]) - 48) * pow(10, i);
     }
     return choice;
 }
-
-void Sort(Transport* vehicle, int amount)
-{
-    for (int i = 0; i < amount; i++)
-    {
-        for (int j = 0; j < amount; j++)
-        {
-            if (vehicle[i].GetTravelTime() > vehicle[j].GetTravelTime())
-            {
-                Transport temporary = vehicle[i];
-                vehicle[i] = vehicle[j];
-                vehicle[j] = temporary;
-            }
-            else if (vehicle[i].GetTravelTime() == vehicle[j].GetTravelTime())
-            {
-                if (vehicle[i].GetRefills() > vehicle[j].GetRefills())
-                {
-                    Transport temporary = vehicle[i];
-                    vehicle[i] = vehicle[j];
-                    vehicle[j] = temporary;
-                }
-            }
-        }
-    }
-}
-
+//
+//void Sort(Transports* Transports, int amount)
+//{
+//    for (int i = 0; i < amount; i++)
+//    {
+//        for (int j = 0; j < amount; j++)
+//        {
+//            if (Transports[i].GetTravelTime() > Transports[j].GetTravelTime())
+//            {
+//                Transport temporary = Transports[i];
+//                Transports[i] = Transports[j];
+//                Transports[j] = temporary;
+//            }
+//            else if (Transports[i].GetTravelTime() == Transports[j].GetTravelTime())
+//            {
+//                if (Transports[i].GetRefills() > Transports[j].GetRefills())
+//                {
+//                    Transport temporary = Transports[i];
+//                    Transports[i] = Transports[j];
+//                    Transports[j] = temporary;
+//                }
+//            }
+//        }
+//    }
+//}
+//
 
 int InputValue(int var)
 {
