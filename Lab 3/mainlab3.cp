@@ -1,408 +1,462 @@
-#include "cmath"
 #include <iostream>
-#include <limits>
 #include <string>
-#include <ctime>
+#include <cmath>
+
 using namespace std;
-int qty = 0; //изначальный размер массива
-double InputProve(double var);
-int InputProve(int var);
-class wheel {
-  double current_mileage;
-  int status; //повреждено/неповреждено 1/0
+
+//доделать меню, сделать все как надо. Переопределить некоторые методы, которые были щадекларированы во второй лабе
+
+
+//Красивее вывод результатов гонки селать. Также вывод (меню 2)
+
+int InputValue(int var);
+double InputValue(double var);
+
+class Wheel
+{
+    double current_mileage;
+    bool status; // целое или нет
 public:
-  int check_status(double mileage, double speed); 
-  wheel() {status=0;current_mileage=0;};
-  double def_wheel(double mileage, double speed) {
+    Wheel();
+    bool CheckStatus(double mileage, double speed);
+    double DefWheel(double mileage, double speed);
+    bool GetStatus();
+    virtual void Output();
+};
+Wheel::Wheel() {
+    current_mileage = 0;
+    status = true;
+}
+bool Wheel::CheckStatus(double mileage, double speed) {
+    double ratio = 1 / (mileage*sqrt(speed));
+    if (ratio >= 0.75) return true;
+    else return false;
+}
+double Wheel::DefWheel(double mileage, double speed) {
     current_mileage = mileage;
-    status = check_status(mileage,speed);
-    return current_mileage;
-  }
-  virtual void output();
-  int get_status() { return status; }
-};
-class engine {
+    status = CheckStatus(mileage, speed);
+    return current_mileage; ///////////////////////////////?????????????????????????????????????????????
+}
+bool Wheel::GetStatus() {
+    return status;
+}
+void Wheel::Output() {
+    if (!status){
+        cout << "Damaged" << endl;
+    }
+    else{
+        cout << "Not damaged" << endl;
+    }
+}
+
+
+
+class Engine
+{
 protected:
-  double engPow; //мощность двигателя HP horsepower
-  double engIntake; //потребление двигателя литров/км l/km
+    double power;
+    double consumption;
 public:
- inline double calculateIntake() {return fabs(pow(engPow, 1 / 3) + sqrt(engPow) - 6.25);}
- engine(){engIntake=0;engPow=0;};
-  void def_engine(double power);
-  virtual void output();
+    Engine();
+    void DefEngine(double powerEn);
+    inline double Calculate_Consumption(); // define
+    virtual void Output();
 };
-class fuel_system {
+
+Engine::Engine() {
+    power = consumption = 0;
+}
+void Engine::DefEngine(double powerEn) {
+    cout << "Engine power in HP: ";
+    powerEn = InputValue(power);
+    power = powerEn;
+    consumption = Calculate_Consumption();
+}
+void Engine::Output() {
+    cout << "Power of engine: " << power << " HP" << endl;
+    cout << "Consumption of engine: " << consumption << " l/100 km" << endl;
+}
+double Engine::Calculate_Consumption() {
+    return fabs(pow(power, 1/3) + sqrt(power) - 6.25);//////////////////////////////////////////////////// formula
+}
+
+
+
+class Fuel_System
+{
 protected:
-  double current_fuel; //текущий обЪём топлива литры l;
+    double volume_tank;
+    double current_fuel;
 public:
-  double TankCapacity; //обЪём бака литры l
-  void calculate_cur_fuel(double engIntake, double mileage, double NRefuel);
-  fuel_system(){TankCapacity=0;current_fuel=0;};
-  void def_fuel_system(double capacity, double engIntake, double mileage);
-  virtual void output();
+    Fuel_System();
+    void CalculateCurrentFuel(double consumption, double mileage, double refills);
+    void DefFuelSystem(double capacity, double consumption, double mileage);
+    virtual void Output();
 };
-class vehicle : public engine, public fuel_system {
-private:
-  int Nwheels;
-  double speed; //скорость км/ч km/h
-  double Time;    //время пути hour
-  int damaged_wheels = 0;
-  double mileage; //пробег km
-  double NRefuel; //количесвто дозаправок
+Fuel_System::Fuel_System() {
+    volume_tank = current_fuel = 0;
+}
+void Fuel_System::CalculateCurrentFuel(double consumption, double mileage, double refills) {
+    if (refills == 0) current_fuel = double(volume_tank - ((consumption / 100) * mileage));
+    else current_fuel = ((refills * volume_tank) - ((consumption / 100) * mileage));
+}
+void Fuel_System::DefFuelSystem(double capacity, double consumption, double mileage) {
+    capacity = volume_tank;
+    cout << "Input Volume Tank in l:";
+    capacity = InputValue(capacity);
+    volume_tank = capacity;
+    current_fuel = capacity;
+}
+void Fuel_System::Output() {
+    cout << "Fuel capacity: " << volume_tank << " l" << endl;
+    cout << "Current fuel: " << current_fuel << " l" << endl << endl;
+}
+
+
+
+class Transports : public Engine, public Fuel_System
+{
+    int count_wheels;
+    double speed;
+    double time;
+    int damaged_wheels = 0;
+    double mileage;
+    int refills;
 public:
-  wheel *ptr_wheel;
-  string name;
-  vehicle() {
-    name = "ADDVEHICLE";
-    Time = mileage = NRefuel = damaged_wheels = 0;
-    ptr_wheel = 0;
-  }
-  vehicle(string vehicle_name, int wheels) {
-    mileage =damaged_wheels = 0; 
-    setName(vehicle_name);
-    setNwheels(wheels);
-    ptr_wheel = new wheel[wheels];
-    for (int i = 0; i < wheels; i++) {
-      ptr_wheel[i] = wheel();
-    }
-    def_fuel_system(0, engIntake, mileage);
-    def_engine(0);
-    calculateSpeed();
-  }
-  void calculateSpeed();
-  void setName(string vehicle_name) { name = vehicle_name; }
-  void setNwheels(int wheels) { Nwheels = wheels; }
-  void setMileage(double tracklen) { mileage=tracklen; }
-  ~vehicle() { cout << "Destruction of " << name << endl; }
-  inline void calculateRaceTime(double raceLength) {
-    Time = (raceLength / speed);
-  };
-  double get_Time(){return Time;};
-  double get_NRefuel(){return NRefuel;};
- double get_speed(){return speed;};
-  void calculateRefuel(double raceLength);
-  void time_display();
-  int getNwheels() { return Nwheels; }
-  void number_of_damaged_wheels();
-  void output();
-  friend vehicle *RatingResults(int qty);
-  friend void outputResults(vehicle *&car,int qty);
-  friend ostream &operator<<(ostream &stream, const vehicle &obj) {
-    return stream << "Number of wheels: " << obj.Nwheels << ";\n"
-                  << "Damaged wheels: " << obj.damaged_wheels << ";\n"
-                  << "Speed: " << obj.speed << " km/h;\n"
-                  << "Mileage: " << obj.mileage << " km;\n"
-                  << "fuel capacity: " << obj.TankCapacity << "l;\n"
-                  << "current fuel: " << obj.current_fuel << "l\n"
-                  << "engine power: " << obj.engPow << " HP;\n"
-                  << "engine intake: " << obj.engIntake << " l/100km;" << endl;
-  }
+    Wheel* wheel_ptr;
+    string name;
+    Transports();
+    Transports(string name_Transports, int wheels);
+    void CalculateSpeed();
+    void SetName(string name_Transports);
+    void SetWheels(int countWheels);
+    void SetMileage(double distance);
+    double GetTime();
+    double GetRefills();
+    double GetSpeed();
+    void CalculateRefills(double distance);
+    void TimeDisplay();
+    int GetWheels();
+    void NumberOfDamagedWheels();
+    inline void CalculateRaceTime(double distance);
+    void Output();
+    friend Transports* RacingResults(Transports *&transp, int quantity);
+    friend void OutputResult(Transports *&transp, int quantity);
+    ~Transports();
 };
-int menu(int &flag);
-void clean(int var = 1);
-void create_vehicle(vehicle *&adres, int &qty, vehicle cars);
-//vehicle *RatingResults(vehicle *&adres, int qty);
-//void outputResults(vehicle *&adres, int qty);
-/////////////////////////////////MAIN/////////////////////////
-int main() {
-  clean();
-  vehicle *adres = nullptr;
-  double trackLen = 0;
-  int flag = 1;
-  int rez = 0;
-  while (flag == 1) {
-    int choice = 10;
-    choice = menu(rez);
-    if ((choice > 5) || (choice < 0)) {
-      cout << "\nError, try another number!\n";
+Transports::Transports() {
+    name = "AddTransports";
+    time = mileage = refills = damaged_wheels = 0;
+    wheel_ptr = nullptr;
+}
+Transports::Transports(string name_Transports, int wheels) {
+    mileage = damaged_wheels = 0;
+    SetName(name_Transports);
+    SetWheels(wheels);
+    wheel_ptr = new Wheel[wheels];
+    for (int i = 0; i < wheels; i++) wheel_ptr[i] = Wheel();
+    DefFuelSystem(0, power, mileage);
+    DefEngine(0);
+    CalculateSpeed();
+}
+
+void Transports::CalculateSpeed() {
+    if (damaged_wheels == 0) speed = double(fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5) * (current_fuel / 100.0)));
+    else speed = fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5) * (current_fuel / 100.0)) / (pow(2, double(damaged_wheels)));
+}
+
+void Transports::CalculateRefills(double distance) {
+    refills = floor((distance * (power / 100)) / volume_tank);
+}
+
+void Transports::TimeDisplay() {
+    int hours = (int) time;
+    double tim = (time - hours) * 60;
+    int minutes = (int)tim;
+    int seconds = int(tim - minutes) * 60;
+
+    if (hours < 24)
+    {
+        cout << "Race time -  " << hours << ":" << minutes << ":" << seconds << endl;
     }
-    switch (choice) {
-    case (0): {
-      cout << "Are you sure you want to exit?\n1-yes\n0-go back\n";
-      int exit = 2;
-      exit = InputProve(exit);
-      if (exit == 1) {
-        flag = 0;
-        break;
-      } else {
-        clean();
-      }
-      break;
+    else
+    {
+        int days = (int) time/24;
+        hours = int(time  - days*24);
+        cout << days << " days " << hours << " hours " << minutes << " minutes " << seconds << " seconds" << endl;
     }
-      delete[] adres;
-      for (int i = 0; i < qty; i++) {
-        delete[] adres[i].ptr_wheel;
-      }
-      break;
-    case (1): {
-      clean();
-      string vehicle_name = "";
-      cout << "\nName of the car: ";
-      cin >> vehicle_name;
-      int Nwheels = 0;
-      cout << "Number of wheels: ";
-      Nwheels = InputProve(Nwheels);
-      while ((Nwheels < 2) || (Nwheels == 5) || (Nwheels == 7)) {
-        cout << "Uncorrect number of wheels! try again:" << endl;
-        Nwheels = InputProve(Nwheels);
-      }
-      vehicle cars(vehicle_name, Nwheels);
-      clean();
-      create_vehicle(adres, qty, cars);
-      rez = 0;
-      break;
-    }
-    case (2): {
-      clean();
-      for (int i = 0; i < qty; i++) {
-        cout << adres[i].name << endl;
-        adres[i].output();
-        cout << "__OR__" << endl;
-        cout << adres[i];
-      }
-      break;
-    }
-    case (3): {
-      clean();
-      cout << "Enter the length of the track (km): ";
-      trackLen = InputProve(trackLen);
-      rez = 0;
-      break;
-    }
-    case (4): {
-      clean();
-      if (trackLen == 0) {
-        cout << "You haven't entered the length of the track!\n";
-        rez = 0;
-        break;
-      } 
-      else {
-        for (int i = 0; i < qty; i++) {
-          adres[i].calculateRaceTime(trackLen);
-          adres[i].setMileage(trackLen);
-          for (int j = 0; j < adres[i].getNwheels(); j++) {
-          adres[i].ptr_wheel[j].def_wheel(trackLen,adres[i].get_speed());
-          }
-          adres[i].number_of_damaged_wheels();
-          adres[i].calculateRefuel(trackLen);
-          adres[i].calculate_cur_fuel(adres[i].calculateIntake(), trackLen,adres[i].get_NRefuel());
-          adres[i].calculateSpeed();
+}
+
+int Transports::GetWheels() {
+    return count_wheels;
+}
+
+void Transports::NumberOfDamagedWheels() {
+    int count = 0;
+    for (int i = 0; i < count_wheels; i++) if (!wheel_ptr[i].GetStatus()) count++;
+    damaged_wheels = count;
+}
+
+void Transports::Output() {
+    cout << name << endl
+    << "Count wheels: " << count_wheels << endl
+    << "Damaged wheels: " << damaged_wheels << endl
+    << "Speed: " << speed << " km/h" << endl
+    << "Mileage: " << mileage << " km" << endl;
+    Engine::Output();
+    Fuel_System::Output();
+    cout << endl;
+}
+
+void Transports::SetName(string name_Transports) {
+    name = name_Transports;
+}
+
+void Transports::SetWheels(int countWheels) {
+    count_wheels = countWheels;
+}
+
+void Transports::SetMileage(double distance) {
+    mileage = distance;
+}
+
+double Transports::GetTime() {
+    return time;
+}
+
+double Transports::GetRefills() {
+    return refills;
+}
+
+double Transports::GetSpeed() {
+    return speed;
+}
+
+Transports::~Transports() {
+    cout << "Destruct " << name << endl;
+}
+
+void Transports::CalculateRaceTime(double distance) {
+    time = (distance / speed);
+}
+
+
+
+
+
+Transports* RacingResults(Transports *&transp, int quantity);
+int Menu(); //Делаем меню
+Transports* AddTransport(Transports* Transports, int amount); //Создаем и перезаписываем массив транспортов
+void SetData(Transports* transport, int quantity);  // Добавляем данные с консоли для нашего транспорта
+int StringReaderForInt(string value); //Конвертируем строку в целое число
+void Sort(Transports* Transports, int amount); // Сортируем для 5 пункта меню
+
+
+
+int main()
+{
+    Transports* transports = nullptr;
+
+
+    int quantity = 0;
+    double distance = 0;
+
+    bool flag = false;
+    bool menu = true;
+
+    while (menu) {
+        int k = Menu();
+        switch (k) {
+            case 1:
+                transports = AddTransport(transports, quantity);
+                SetData(transports, quantity);
+                quantity++;
+                break;
+            case 2:
+                if (quantity == 0)
+                {
+                    cout << "Julius Sergeevich, you didn't add any transport. What did you expected to see?" << endl;
+                }
+                else for (int i = 0; i < quantity; i ++) transports[i].Output();
+                break;
+            case 3:
+                cout << "Input/change route length: ";
+                distance = InputValue(distance);
+                flag = false;
+                break;
+            case 4:
+                if (quantity == 0 || distance == 0) {
+                    cout << "Array of transport is empty or distance is null\n";
+                }
+                else {
+                    for (int i = 0; i < quantity; i++) {
+                        transports[i].CalculateRaceTime(distance);
+                        transports[i].SetMileage(distance);
+                        for (int j = 0; j < transports[i].GetWheels(); j++) {
+                            transports[i].wheel_ptr[j].DefWheel(distance, transports[i].GetSpeed());
+                        }
+                        transports[i].NumberOfDamagedWheels();
+                        transports[i].CalculateRefills(distance);
+                        transports[i].CalculateCurrentFuel(transports[i].Calculate_Consumption(), distance, transports[i].GetRefills());
+                        transports[i].CalculateSpeed();
+                    }
+                    flag = true;
+                    cout << "Calculating...\n";
+                }
+                break;
+            case 5:
+                if (!flag) {
+                    cout << "No-no-no! Firstly calculate THESE routes for each transport! Have you just changed distance and didn't calculate it for each transport?" << endl;
+                }
+                else{
+//                    Sort(transports, quantity);
+//                    cout << "Name\t\tRefills\t\tTravel time\n";
+//                    for (int i = 0; i < quantity; i++) transports[i].();
+                    OutputResult(transports, quantity);
+                }
+                break;
+            case 6:
+                cout << "Are you sure? (y/n)" << endl;
+                char quit;
+                cin >> quit;
+                if (quit == 'y' || quit == 'Y')
+                {
+                    cout << "OK, as you wish" << endl;
+                    menu = false;
+                }
+                break;
+            default:
+
+                break;
         }
-      }
-      break;
     }
-    case (5): {
-      clean();
-      outputResults(adres,qty);
-      break;
-    }
-    default:
-      clean();
-      break;
-    }
-  }
-
-  return 0;
 }
 
-void clean(int var) {
-  for (int i = 0; i < 3; i = i + 1) {
-    cout << "\n";
-  }
-}
-int menu(int &rez) {
-  cout << "\nInter a number to choose action:\n";
-  cout << "0 for exit\n";
-  cout << "1 for adding Vehicle\n";
-  cout << "2 for output information about Vehicle\n";
-  cout << "3 to enter length of the track\n";
-  cout << "4 for route calculation\n"; //расчет прохождения трассы
-  if (rez == 1)
-    cout << "5 for results of last race\n";
-  int choice = 0;
-  choice = InputProve(choice);
-  if (choice == 4) {
-    rez = 1;
-  }
-  return choice;
-}
-void create_vehicle(vehicle *&adres, int &qty, vehicle cars) {
-  vehicle *tempArray;
-  if (adres != nullptr) {
-    tempArray = new vehicle[qty + 1];
-    for (int i = 0; i < qty; i++) {
-      tempArray[i] = adres[i];
+// Функции друзья
+
+Transports* RacingResults(Transports *&transp, int quantity)
+{
+    Transports* result = new Transports[quantity];
+    Transports* temp = new Transports[quantity];
+    for (int i = 0; i < quantity; i++) {
+        result[i] = transp[i];
     }
-    delete[] adres;
-  } else {
-    tempArray = new vehicle[1];
-  }
-  tempArray[qty] = cars;
-  adres = tempArray;
-  qty++;
+    for (int i = 0; i < quantity; i++) {
+        for (int j = 0; j < quantity; j++) {
+            if ((result[i].GetTime()- result[j].GetTime() < 0) && (result[i].GetRefills() - result[i].GetRefills() <= 0)) {
+                temp[0] = result[i];
+                result[i] = result[j];
+                result[j] = temp[0];
+            }
+        }
+    }
+    delete[] temp;
+    return result;
 }
 
-vehicle *RatingResults(vehicle *&adres, int qty) {
-  vehicle *results = new vehicle[qty];
-  vehicle *rez_copy = new vehicle[1];
-  for (int i = 0; i < qty; i++) {
-    results[i] = adres[i];
-  }
-  for (int i = 0; i < qty; i++) {
-    for (int j = 0; j < qty; j++) {
-      if ((results[i].get_Time()- results[j].get_Time() < 0) &&
-          (results[i].get_NRefuel() - results[i].get_NRefuel() <= 0)) {
-        rez_copy[0] = results[i];
-        results[i] = results[j];
-        results[j] = rez_copy[0];
-      }
+void OutputResult(Transports *&transp, int quantity)
+{
+    Transports *results = RacingResults(transp,quantity);
+    for (int i = 0; i < quantity; i++) {
+        cout << results[i].name << endl;
+        results[i].TimeDisplay();
+        cout << "Refuel times: " << int(results[i].refills) << endl << endl;
     }
-  }
-  delete[] rez_copy;
-  return results;
-}
-void outputResults(vehicle *&adres, int qty) {
-  vehicle *results = RatingResults(adres,qty);
-  for (int i = 0; i < qty; i++) {
-    cout << results[i].name << endl;
-    results[i].time_display();
-    cout << "Refuel times: " << int(results[i].NRefuel) << endl;
-  }
-  delete[] results;
+    delete[] results;
 }
 
-double InputProve(double var) {
-  cin >> var;
-  if (cin.fail() || var <= 0) {
-    while (!(cin >> var) || var <= 0) {
-      cout << "Uncorrect, try again\n";
-      cin.clear();
-      cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-  }
-  return var;
-}
-int InputProve(int var) {
-  cin >> var;
-  if (cin.fail() || var < 0) {
-    while (!(cin >> var) || var < 0) {
-      cout << "Uncorrect, try again\n";
-      cin.clear();
-      cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-  }
-  return var;
+
+
+// Консольное меню
+int Menu ()
+{
+    cout << "--------------------------------" << endl;
+    cout << "\tMENU" << endl;
+    cout << "1. Add transport" << endl;
+    cout << "2. Show existing transports" << endl;
+    cout << "3. Enter/change route length" << endl;
+    cout << "4. Calculate routes for each transport" << endl;
+    cout << "5. See the result of completing the route" << endl;
+    cout << "6. Quit the program\n" << endl;
+    cout << "Your choice: " << endl;
+    string s;
+    cin >> s;
+    int choice = StringReaderForInt(s);
+    cout << '\n';
+    return choice;
 }
 
-int wheel::check_status(double mileage, double speed) {
-  double ratio = (1/(mileage*sqrt(speed)));
-  if (ratio>=0.5)
-  {
-    //cout<< "Wheel is not damaged"<<endl;
-    return 0;
-  }
-  else
-  {
-    //cout<<"Wheel is damaged"<<endl;
-    return 1;
-  }
-}
-/*
-  int wheel::check_status(double mileage, double time) {
-    int ratio = int(mileage / time);
-    //cout<<"TIME"<<time<<endl;
-    //cout<<"Ratio"<<ratio<<endl;
-    int damageProb = (rand() % (ratio+1))+1;
-    //cout<<"DAMAGE"<<damageProb<<endl;
-    // cout << "CHECKING STATUS OF WHEELS..." << endl;
-    if (damageProb > (ratio / 2)) 
+//Создаем и перезаписываем массив транспортов
+Transports* AddTransport(Transports* transports, int amount)
+{
+    if (amount == 0) transports = new Transports[amount+1];
+    else
     {
-      return 1;
-    } 
-    else 
+        Transports* temp = new Transports[amount + 1];
+        for (int i = 0; i < amount; i++) temp[i] = transports[i];
+        delete[] transports;
+        transports = temp;
+    }
+    return transports;
+}
+
+// Добавляем данные с консоли для нашего транспорта
+void SetData(Transports* transport, int quantity)
+{
+    //Кол-во колес
+
+    cout << "Input count of wheels: ";// количество колес;
+    int count_wheels_for_constr = InputValue(count_wheels_for_constr);
+
+
+    cout << endl << "Input the name of transport :";  //название.
+    string name_for_constr;
+    cin >> name_for_constr;
+
+    //Конструктор нашего транспорта
+    transport[quantity] = Transports(name_for_constr, count_wheels_for_constr);
+    cout << endl << "Transport added!" << endl;
+}
+
+
+
+//Конвертируем строку в целое число
+int StringReaderForInt(string value)
+{
+    int choice = 0;
+    for (int i = 0; i < value.length(); i++)
     {
-      return 0;
+        if ((int(value[i]) > 47) && (int(value[i]) < 58)) choice += (int(value[i]) - 48) * pow(10, i);
     }
-  }*/
-void wheel ::output() {
-  if (status == 1) {
-    cout << "damaged" << endl;
-  } else {
-    cout << "not damaged" << endl;
-  }
-}
-void engine ::output() {
-  cout << "engine power: " << engPow << " HP;" << endl;
-  cout << "engine intake: " << engIntake << " l/100km;" << endl;
+    return choice;
 }
 
-void engine::def_engine(double power) {
-  cout << "Engine power in HP: ";
-  power = InputProve(power);
-  engPow = power;
-  engIntake = calculateIntake();
-}
-void fuel_system ::calculate_cur_fuel(double engIntake, double mileage,double NRefuel) { //расчёт текущего обЪёма топлива
-  if (NRefuel == 0) {
-    current_fuel=double(TankCapacity - ((engIntake / 100) * mileage));
-  } else {
-    current_fuel=(((NRefuel)*TankCapacity) - ((engIntake / 100) * mileage));
-  }
-}
-void fuel_system ::def_fuel_system(double capacity, double engIntake,double mileage) {
-  cout << "fuel capacity: ";
-  capacity = InputProve(capacity);
-  TankCapacity = capacity;
-  current_fuel = capacity;
-}
-void fuel_system ::output() {
-  cout << "fuel capacity: " << TankCapacity << "l" << endl;
-  cout << "current fuel: " << current_fuel << "l" << endl;
-}
-
-void vehicle::output() {
-  cout << "Number of wheels: " << Nwheels << ";\n"
-       << "Damaged wheels: " << damaged_wheels << ";\n"
-       << "speed: " << speed << " km/h;\n"
-       << "mileage: " << mileage << " km;" << endl;
-  engine::output();
-  fuel_system::output();
-}
-
-void vehicle ::time_display() {
-  double t = this->Time;
-  int hours = int(t);
-  double cur_time = (t - hours) * 60;
-  int minutes = int(cur_time);
-  int seconds = int((cur_time - minutes) * 60);
-  cout << "TIME: " << hours << ":" << minutes << ":" << seconds << endl;
-}
-
-void vehicle ::calculateSpeed() {
-  if (damaged_wheels == 0) {
-speed= double(fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0)));
- }
- else
- {
-   speed = (fabs(sqrt(engPow) * (70.0 / double(Nwheels) - 2.5) * (current_fuel / 100.0))/(pow(2., double(damaged_wheels))));
-     }
-  }
-
-
-void vehicle ::number_of_damaged_wheels() {
-  int count = 0;
-  for (int i = 0; i < Nwheels; i++) {
-    if (ptr_wheel[i].get_status() == 1) {
-      count++;
+int InputValue(int var)
+{
+    cin >> var;
+    if(cin.fail() || var <= 0)
+    {
+        while (!(cin >> var) || var <= 0)
+        {
+            cout << "Incorrect, try again!" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize> :: max(), '\n');
+        }
     }
-  }
-  damaged_wheels = count;
+    return var;
 }
 
-void vehicle ::calculateRefuel(double raceLength) {
-  double Refuel = (raceLength * (engIntake / 100)) / TankCapacity;
-  if (Refuel > 1)
-    this->NRefuel= ceil(Refuel);
-  else
-    this->NRefuel= floor(Refuel);
+double InputValue(double var)
+{
+    cin >> var;
+    if(cin.fail() || var <= 0)
+    {
+        while (!(cin >> var) || var <= 0)
+        {
+            cout << "Incorrect, try again!" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize> :: max(), '\n');
+        }
+    }
+    return var;
 }
