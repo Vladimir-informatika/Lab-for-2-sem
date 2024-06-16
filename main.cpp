@@ -324,6 +324,7 @@ int InputValue(int var)
     cin >> var;
     if(cin.fail() || var <= 0)
     {
+        cout << "Incorrect, try again!! " << endl;
         while (!(cin >> var) || var <= 0)
         {
             cout << "Incorrect, try again!" << endl;
@@ -339,6 +340,7 @@ double InputValue(double var)
     cin >> var;
     if(cin.fail() || var <= 0)
     {
+        cout << "Incorrect, try again!! " << endl;
         while (!(cin >> var) || var <= 0)
         {
             cout << "Incorrect, try again!" << endl;
@@ -348,4 +350,3 @@ double InputValue(double var)
     }
     return var;
 }
-
