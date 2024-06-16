@@ -1,9 +1,11 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <limits>
 
 using namespace std;
 
+//адекватность введенных значений
 
 
 class Transport
@@ -16,7 +18,7 @@ class Transport
     string name;
     double speed;
     double engine_consumption;
-    int refills;
+    long int refills;
 public:
     Transport();
     Transport(int countWheels, double volumeTank, double power, string str);
@@ -82,7 +84,7 @@ double Transport::GetTravelTime()
 }
 
 void Transport::CalcRefills(double distance) {
-    refills = (int)floor(distance / (volume_tank
+    refills = (long int)floor(distance / (volume_tank
                                      * CalcEngineConsumption()));
 }
 
@@ -110,16 +112,16 @@ void Transport::Time_display()
 }
 
 void Transport::PrintRefillsAndTravelTime() {
-    cout << name << "\t\t" << refills << "\t\t";
+    cout << name << "\t\t\t" << refills << "\t\t\t";
     Time_display();
 }
 
 void Transport::PrintData() {
     cout << name << endl;
     cout << "Count wheels: " << count_wheels << endl
-         << "Power engine: " << power_engine << endl
-         << "Speed: " << speed << endl
-         << "Engine consumption: " << engine_consumption << endl << endl;
+         << "Power engine: " << power_engine << " HP" <<  endl
+         << "Speed: " << speed << " kph" <<endl
+         << "Engine consumption: " << engine_consumption << " l/ 100 km" << endl << endl;
 }
 
 
@@ -137,7 +139,7 @@ double InputValue(double var);
 
 int main()
 {
-    Transport* transport;
+    Transport* transport = nullptr;
     int quantity = 0;
     double distance = 0;
     bool flag = false;
@@ -160,8 +162,7 @@ int main()
                 break;
             case 3:
                 cout << "Input/change route length: ";
-                cin >> distance;
-                Check(checker_for_route, distance);
+                distance = Check(checker_for_route, distance);
                 flag = false;
                 break;
             case 4:
@@ -184,7 +185,7 @@ int main()
                 }
                 else {
                     Sort(transport, quantity);
-                    cout << "Name\t\tRefills\t\tTravel time\n";
+                    cout << "Name\t\t\tRefills\t\t\tTravel time\n";
                     for (int i = 0; i < quantity; i++) transport[i].PrintRefillsAndTravelTime();
                 }
                 break;
@@ -244,20 +245,41 @@ void SetData(Transport* transport, int quantity)
     bool checker = true;
     string str;
     //Кол-во колес
-    cout << "Input count of wheels: ";// количество колес;
+    cout << "Input count of wheels (less than 20! I think it is enough): ";// количество колес;
     int count_wheels_for_constr = InputValue(count_wheels_for_constr);
 
 
-    // Пробег
-    //cout << "Input the mileage :"; //пробег;
-    //double mileage_for_constr = InputValue(mileage_for_constr);
-
     // Объём бака
-    cout << "Input the volume of the tank :";  //объем бака;
+    cout << "Input the volume of the tank (less than 1000) :";  //объем бака;
     double volume_tank_for_constr = InputValue(volume_tank_for_constr);
+    bool flag = true;
+    if (volume_tank_for_constr >= 1000 || volume_tank_for_constr < 0.01) {
+        cout << "THIS IS A MADNESS!! Have you ever seen a car with SOOO volume tank?"
+        << endl << "I refuse to accept this, try again" << endl;
+        flag = false;
+        while (!flag) {
+            volume_tank_for_constr = InputValue(volume_tank_for_constr);
+            if (volume_tank_for_constr < 1000 && volume_tank_for_constr >= 0.01) flag = true;
+            else {
+                cout << "You seem to have misunderstood me, let's do it again" << endl;
+            }
+        }
+    }
 
-    cout << "Input the power of the engine :";   //мощность двигателя;
+    cout << "Input the power of the engine(less than 114 800):";   //мощность двигателя;
     double power_engine_for_constr = InputValue(power_engine_for_constr);
+    if (power_engine_for_constr >= 114800 || power_engine_for_constr < 0.01) {
+        cout << "THIS IS A MADNESS!! Have you ever seen a car with SOOO powerful engine?"
+        << endl << "I refuse to accept this, try again" << endl;
+        flag = false;
+        while (!flag) {
+            power_engine_for_constr = InputValue(power_engine_for_constr);
+            if (power_engine_for_constr < 114800 && power_engine_for_constr >= 0.01) flag = true;
+            else {
+                cout << "You seem to have misunderstood me, let's do it again" << endl;
+            }
+        }
+    }
 
     cout << "Input the name of transport :";  //название.
     string name_for_constr;
@@ -270,11 +292,12 @@ void SetData(Transport* transport, int quantity)
 
 // Делаем проверку на отрицательность при вводе
 double Check(bool checker, double value) {
-    if (value <= 0) checker = false;
+    value = InputValue(value);
+    if (value < 0.001 || value > 100000) checker = false;
     while (!checker){
-        cout << "Incorrect, try again! Value must be greater than 0!";
-        cin >> value;
-        if (value > 0) checker = true;
+        cout << "What are you doing?? Give me adequate route - more than 1 meter and less than 100.000 km (2.5 Earth equators)" << endl;
+        value = InputValue(value);
+        if (value >= 0.001 && value <= 100000) checker = true;
     }
     cout << endl;
     return value;
@@ -322,10 +345,10 @@ void Sort(Transport* vehicle, int amount)
 int InputValue(int var)
 {
     cin >> var;
-    if(cin.fail() || var <= 0)
+    if(cin.fail() || var <= 0 || var >= 20)
     {
         cout << "Incorrect, try again!! " << endl;
-        while (!(cin >> var) || var <= 0)
+        while (!(cin >> var) || var <= 0 || var >= 20)
         {
             cout << "Incorrect, try again!" << endl;
             cin.clear();
@@ -350,3 +373,4 @@ double InputValue(double var)
     }
     return var;
 }
+
