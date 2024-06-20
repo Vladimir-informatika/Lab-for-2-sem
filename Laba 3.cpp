@@ -121,7 +121,7 @@ void Engine::Output() {
     cout << "Consumption of engine: " << consumption << " l/100 km" << endl;
 }
 double Engine::Calculate_Consumption() {
-    return fabs(pow(power, 1/3) + sqrt(power) - 6.25)
+    return fabs(pow(power, 1/3) + sqrt(power) - 6.25);
 }
 
 
