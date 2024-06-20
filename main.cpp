@@ -5,8 +5,6 @@
 
 using namespace std;
 
-//адекватность введенных значений
-
 
 class Transport
 {
@@ -129,7 +127,7 @@ void Transport::PrintData() {
 
 int Menu(); //Делаем меню
 Transport* AddTransport(Transport* vehicle, int amount); //Создаем и перезаписываем массив транспортов
-void SetData(Transport* transport, int quantity);  // Добавляем данные с консоли для нашего транспорта
+void SetData(Transport* transport, int     quantity);  // Добавляем данные с консоли для нашего транспорта
 double Check(bool checker, double value); // Делаем проверку на отрицательность при вводе
 int StringReaderForInt(string value); //Конвертируем строку в целое число
 void Sort(Transport* vehicle, int amount); // Сортируем для 5 пункта меню
@@ -152,6 +150,7 @@ int main()
                 transport = AddTransport(transport, quantity);
                 SetData(transport, quantity);
                 quantity++;
+                flag = false;
                 break;
             case 2:
                 if (quantity == 0)
@@ -245,7 +244,7 @@ void SetData(Transport* transport, int quantity)
     bool checker = true;
     string str;
     //Кол-во колес
-    cout << "Input count of wheels (less than 20! I think it is enough): ";// количество колес;
+    cout << "Input count of wheels (less than 100! I think it is enough): ";// количество колес;
     int count_wheels_for_constr = InputValue(count_wheels_for_constr);
 
 
@@ -345,10 +344,10 @@ void Sort(Transport* vehicle, int amount)
 int InputValue(int var)
 {
     cin >> var;
-    if(cin.fail() || var <= 0 || var >= 20)
+    if(cin.fail() || var <= 0 || var >= 100)
     {
         cout << "Incorrect, try again!! " << endl;
-        while (!(cin >> var) || var <= 0 || var >= 20)
+        while (!(cin >> var) || var <= 0 || var >= 100)
         {
             cout << "Incorrect, try again!" << endl;
             cin.clear();
@@ -373,4 +372,3 @@ double InputValue(double var)
     }
     return var;
 }
-
