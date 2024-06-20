@@ -6,9 +6,6 @@
 
 using namespace std;
 
-//доделать меню, сделать все как надо. Переопределить некоторые методы, которые были щадекларированы во второй лабе
-// если скорость равно 0, транспорт выбывает из гонки
-//сделать лимиты - адеквватных значений
 
 int InputValue(int var);
 double InputValue(double var);
@@ -70,7 +67,6 @@ bool Wheel::CheckStatus(double mileage, double speed) {
 void Wheel::DefWheel(double mileage, double speed) {
     current_mileage = mileage;
     if (status) status = CheckStatus(mileage, speed);
-    //return current_mileage; ///////////////////////////////?????????????????????????????????????????????
 }
 bool Wheel::GetStatus() {
     return status;
@@ -102,16 +98,16 @@ Engine::Engine() {
     power = consumption = 0;
 }
 void Engine::DefEngine(double powerEn) {
-    cout << "Engine power in HP (0.01 < x < 114 800): ";
+    cout << "Engine power in HP (0.01 <= x <= 114 800): ";
     powerEn = InputValue(powerEn);
     bool flag = true;
-    if (powerEn >= 114800 || powerEn < 0.01) {
+    if (powerEn > 114800 || powerEn < 0.01) {
         cout << "THIS IS A MADNESS!! Have you ever seen a car with SOOO powerful engine?"
         << endl << "I refuse to accept this, try again" << endl;
         flag = false;
         while (!flag) {
             powerEn = InputValue(powerEn);
-            if (powerEn < 114800 && powerEn >= 0.01) flag = true;
+            if (powerEn <= 114800 && powerEn >= 0.01) flag = true;
             else {
                 cout << "You seem to have misunderstood me, let's do it again" << endl;
             }
@@ -125,7 +121,7 @@ void Engine::Output() {
     cout << "Consumption of engine: " << consumption << " l/100 km" << endl;
 }
 double Engine::Calculate_Consumption() {
-    return fabs(pow(power, 1/3) + sqrt(power) - 6.25);//////////////////////////////////////////////////// formula
+    return fabs(pow(power, 1/3) + sqrt(power) - 6.25)
 }
 
 
@@ -145,28 +141,26 @@ Fuel_System::Fuel_System() {
     volume_tank = current_fuel = 0;
 }
 
-void Fuel_System::CalculateCurrentFuel(double power, int distance, double refills) {
-    // if (refills == 0) current_fuel = double(volume_tank - (consumption * mileage));
-    // else current_fuel = ((refills * volume_tank) - (consumption * mileage));
+void Fuel_System::CalculateCurrentFuel(double consumption, int distance, double refills) {
     if (refills == 0) {
-        current_fuel = distance * ( power/100 );
+        current_fuel = volume_tank - distance * ( consumption /100 );
     }
     else {
-        current_fuel = (distance * (power / 100)) - (refills * volume_tank);
+        current_fuel = (distance * (consumption / 100)) - (refills * volume_tank);
     }
 }
 void Fuel_System::DefFuelSystem(double capacity, double consumption, double mileage) {
     capacity = volume_tank;
-    cout << "Input Volume Tank in l:";
+    cout << "Input Volume Tank in l (0.01 <= x <= 1000):";
     capacity = InputValue(capacity);
     bool flag = true;
-    if (capacity >= 1000 || capacity < 0.01) {
+    if (capacity > 1000 || capacity < 0.01) {
         cout << "THIS IS A MADNESS!! Have you ever seen a car with SOOO volume tank?"
         << endl << "I refuse to accept this, try again" << endl;
         flag = false;
         while (!flag) {
             capacity = InputValue(capacity);
-            if (capacity < 1000 && capacity >= 0.01) flag = true;
+            if (capacity <= 1000 && capacity >= 0.01) flag = true;
             else {
                 cout << "You seem to have misunderstood me, let's do it again" << endl;
             }
@@ -191,6 +185,7 @@ class Transports : public Engine, public Fuel_System
     int damaged_wheels = 0;
     double mileage;
     int refills;
+    bool state = true;
 public:
     Wheel* wheel_ptr;
     string name;
@@ -203,7 +198,7 @@ public:
     double GetTime();
     double GetRefills();
     double GetSpeed();
-    double GetPower();
+    double GetConsumption();
     void CalculateRefills(double distance);
     void TimeDisplay();
     int GetWheels();
@@ -231,12 +226,13 @@ Transports::Transports(string name_Transports, int wheels) {
 }
 
 void Transports::CalculateSpeed() {
-    if (damaged_wheels == 0) speed = double(fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5) * (current_fuel / 100.0)));
-    else speed = fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5) * (current_fuel / 100.0)) / (pow(2, double(damaged_wheels)));
+    if (damaged_wheels == 0) speed = double(fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5)));
+    else speed = fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5)) / (pow(2, double(damaged_wheels)));
 }
 
 void Transports::CalculateRefills(double distance) {
-    refills = floor((distance * (power / 100)) / volume_tank);
+    refills = floor((distance * (consumption / 100)) / volume_tank);
+
 }
 
 void Transports::TimeDisplay()
@@ -244,7 +240,7 @@ void Transports::TimeDisplay()
     int hours = (int) time;
     double tim = (time - hours) * 60;
     int minutes = (int)tim;
-    int seconds = int(tim - minutes) * 60;
+    int seconds = int((tim - minutes) * 60);
 
     if (hours < 24)
     {
@@ -290,9 +286,6 @@ void Transports::SetMileage(double distance) {
     mileage += distance;
 }
 
-double Transports::GetPower() {
-    return power;
-}
 
 double Transports::GetTime() {
     return time;
@@ -301,6 +294,11 @@ double Transports::GetTime() {
 double Transports::GetRefills() {
     return refills;
 }
+
+double Transports::GetConsumption() {
+    return consumption;
+}
+
 
 double Transports::GetSpeed() {
     return speed;
@@ -335,7 +333,7 @@ int main()
 
     bool flag = false;
     bool menu = true;
-
+    bool checker;
     while (menu) {
         int k = Menu();
         switch (k) {
@@ -343,6 +341,7 @@ int main()
                 transports = AddTransport(transports, quantity);
                 SetData(transports, quantity);
                 quantity++;
+                flag = false;
                 break;
             case 2:
                 if (quantity == 0)
@@ -354,6 +353,14 @@ int main()
             case 3:
                 cout << "Input/change route length: ";
                 distance = InputValue(distance);
+                checker = true;
+                if (distance < 0.001 || distance > 100000) checker = false;
+                while (!checker){
+                    cout << "What are you doing?? Give me adequate route - more than 1 meter and less than 100.000 km (2.5 Earth equators)" << endl;
+                    distance = InputValue(distance);
+                    if (distance >= 0.001 && distance <= 100000) checker = true;
+                }
+                cout << endl;
                 flag = false;
                 break;
             case 4:
@@ -369,9 +376,7 @@ int main()
                         }
                         transports[i].NumberOfDamagedWheels();
                         transports[i].CalculateRefills(distance);
-                        double power;
-                        power = transports[i].GetPower();
-                        transports[i].CalculateCurrentFuel(power, distance, transports[i].GetRefills());
+                        transports[i].CalculateCurrentFuel(transports[i].GetConsumption(), distance, transports[i].GetRefills());
                         transports[i].CalculateSpeed();
                     }
                     flag = true;
@@ -397,7 +402,6 @@ int main()
                 }
                 break;
             default:
-
                 break;
         }
     }
@@ -430,10 +434,8 @@ void OutputResult(Transports *&transp, int quantity)
     Transports *results = RacingResults(transp,quantity);
     cout << "Name\t\t\tRefills\t\t\tTravel time\n";
     for (int i = 0; i < quantity; i++) {
-       // cout << results[i].name << ;
         cout << results[i].name << "\t\t\t" << results[i].refills << "\t\t\t";
         results[i].TimeDisplay();
-       // cout << "Refuel times: " << int(results[i].refills) << endl;
     }
     delete[] results;
 }
@@ -477,17 +479,17 @@ void SetData(Transports* transport, int quantity)
 {
     //Кол-во колес
 
-    cout << "Input count of wheels (less than 100! I think it is enough): ";// количество колес;
+    cout << "Input count of wheels (less than 20! I think it is enough): ";// количество колес;
     int count_wheels_for_constr = 0;
     count_wheels_for_constr = InputValue(count_wheels_for_constr);
     bool flag = true;
-    if (count_wheels_for_constr > 100 || count_wheels_for_constr < 1) {
+    if (count_wheels_for_constr > 20 || count_wheels_for_constr < 1) {
         cout << "THIS IS A MADNESS!! Have you ever seen a similar car?"
         << endl << "I refuse to accept this, try again" << endl;
         flag = false;
         while (!flag) {
             count_wheels_for_constr = InputValue(count_wheels_for_constr);
-            if (count_wheels_for_constr < 1000 && count_wheels_for_constr >= 0.01) flag = true;
+            if (count_wheels_for_constr <= 20 && count_wheels_for_constr >= 1) flag = true;
             else {
                 cout << "You seem to have misunderstood me, let's do it again" << endl;
             }
