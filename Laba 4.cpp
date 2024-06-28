@@ -34,6 +34,11 @@ Input InputValue(Input var) {
     return var;
 }
 
+template<typename Type>
+Type max(Type a, Type b) {
+    return (a >= b ? a : b);
+}
+
 
 
 int Probability();
@@ -54,6 +59,7 @@ public:
     void DefWheel(double mileage, double speed);
     bool GetStatus();
     virtual void Output();
+
 };
 
 Wheel::Wheel() {
@@ -128,7 +134,7 @@ Engine::Engine() {
 
 void Engine::DefEngine(double powerEn) {
     std::cout << "Engine power in HP: ";
-    powerEn = InputValue(powerEn);
+    powerEn = InputValue<double>(powerEn);
     power = powerEn;
     consumption = Calculate_Consumption();
 }
@@ -173,7 +179,7 @@ void Fuel_System::CalculateCurrentFuel(double consumption, int distance, double 
 void Fuel_System::DefFuelSystem(double capacity, double consumption, double mileage) {
     capacity = volume_tank;
     std::cout << "Input Volume Tank in l:";
-    capacity = InputValue(capacity);
+    capacity = InputValue<double>(capacity);
     volume_tank = capacity;
     current_fuel = capacity;
 }
@@ -201,9 +207,9 @@ public:
     Wheel* wheel_ptr;
     std::string name;
     Transports();
-    Transports(std::string name_Transports, int wheels);
+    Transports(const std::string &name_Transports, int wheels);
     void CalculateSpeed();
-    void SetName(std::string name_Transports);
+    void SetName(const std::string &name_Transports);
     void SetWheels(int countWheels);
     void SetMileage(double distance);
     double GetTime();
@@ -218,6 +224,11 @@ public:
     void Output();
     friend Transports* RacingResults(Transports *&transp, int quantity);
     friend void OutputResult(Transports *&transp, int quantity);
+
+
+
+    bool CanEndLip(double route);
+    
     ~Transports();
 };
 
@@ -226,12 +237,12 @@ Transports::Transports() {
     time = mileage = refills = damaged_wheels = 0;
     wheel_ptr = nullptr;
 }
-Transports::Transports(std::string name_Transports, int wheels) {
+Transports::Transports(const std::string &name_Transports, int wheels) {
     mileage = damaged_wheels = 0;
     SetName(name_Transports);
     SetWheels(wheels);
     wheel_ptr = new Wheel[wheels];
-    for (int i = 0; i < wheels; i++) wheel_ptr[i] = Wheel();
+    for (size_t i = 0; i != wheels; i++) wheel_ptr[i] = Wheel();
     DefFuelSystem(0, power, mileage);
     DefEngine(0);
     CalculateSpeed();
@@ -269,7 +280,7 @@ int Transports::GetWheels() {
 
 void Transports::NumberOfDamagedWheels() {
     int count = 0;
-    for (int i = 0; i < count_wheels; i++) if (!wheel_ptr[i].GetStatus()) count++;
+    for (size_t i = 0; i != count_wheels; i++) if (!wheel_ptr[i].GetStatus()) count++;
     damaged_wheels = count;
 }
 
@@ -283,7 +294,7 @@ void Transports::Output() {
     Fuel_System::Output();
 }
 
-void Transports::SetName(std::string name_Transports) {
+void Transports::SetName(const std::string &name_Transports) {
     name = name_Transports;
 }
 
@@ -322,6 +333,17 @@ void Transports::CalculateRaceTime(double distance) {
 }
 
 
+bool Transports::CanEndLip(double route) {
+    if (((route * (consumption / 100)) / volume_tank) > 1) return false;
+    else return true;
+}
+
+
+
+
+
+
+
 // class MyClass {
 // public:
 //     int data;
@@ -333,36 +355,82 @@ void Transports::CalculateRaceTime(double distance) {
 
 
 ///////////////////////////////////////////////////////////////
+using vektor = std::vector<Transports>;
+
 int Menu();
-
-
+vektor AddTransport(vektor &transports);
+vektor Race(vektor &transports, double route);
 
 
 
 int main() {
-    using vektor_class = std::vector<Transports>;
-    vektor_class transports;
-
-
+    vektor transports;
+    double distance = 0;
+    double route = 0;
+    int rings = 0;
+    
     bool menu = true;
     while (menu) {
-        int k = Menu();
-        switch(k) {
+        bool flag = false;
+        switch(Menu()) {
             case 1:
+                AddTransport(transports);
+                flag = false;
                 break;
             case 2:
+                if (transports.empty())
+                {
+                    std::cout << "Julius Sergeevich, you didn't add any transport. What did you expected to see?" << std::endl;
+                }
+                else for (size_t i = 0; i != transports.size(); i ++) transports[i].Output();
                 break;
             case 3:
+                std::cout << "Input length of the lip" << std::endl;
+                route = InputValue<double>(route);
+                std::cout << "Input count of lips" << std::endl; 
+                rings = InputValue<int>(rings);
+                distance = route * rings;
+                std::cout << std::endl;
+                flag = false;
                 break;
             case 4:
+                if (transports.empty() || distance == 0) {
+                    std::cout << "Array of transport is empty or distance is null\n";
+                }
+                else {
+                    vektor race = Race(transports, route);
+//////////////////////////////////////////////////////////////////////////////////////////////// Здесь остановился
+                    for (size_t i = 0; i != race.size(); ++i) {
+                        transports[i].CalculateRaceTime(distance);
+                        transports[i].SetMileage(distance);
+                        for (size_t j = 0; j != transports[i].GetWheels(); j++) {
+                            transports[i].wheel_ptr[j].DefWheel(distance, transports[i].GetSpeed());
+                        }
+                        transports[i].NumberOfDamagedWheels();
+                        transports[i].CalculateRefills(distance);
+                        transports[i].CalculateCurrentFuel(transports[i].GetConsumption(), distance,
+                                                           transports[i].GetRefills());
+                        transports[i].CalculateSpeed();
+                    }
+                    flag = true;
+                    std::cout << "Calculating...\n";
+                }
                 break;
             case 5:
                 break;
-
             case 6:
+                std::cout << "Are you sure? (y/n)" << std::endl;
+                char quit;
+                std::cin >> quit;
+                if (quit == 'y' || quit == 'Y')
+                {
+                    std::cout << "OK, as you wish" << std::endl;
+                    transports.resize(0);
+                    menu = false;
+                }
                 break;
-
             default:
+                std::cout << "Hmm, incorrect!!!" << std::endl;
                 break;
         }
     }
@@ -388,10 +456,37 @@ int Menu ()
     std::cout << "6. Quit the program\n" << std::endl;
     std::cout << "Your choice: " << std::endl;
     int choice = 0;
-    choice = InputValue(choice);
+    choice = InputValue<int>(choice);
     std::cout << '\n';
     return choice;
 }
+vektor AddTransport(vektor &transports) {
+    std::cout << "Input count of wheels: ";// количество колес;
+    int count_wheels_for_constr = 0;
+    count_wheels_for_constr = InputValue<int>(count_wheels_for_constr);
+
+
+    std::cout << "Input the name of transport :";  //название.
+    std::string name_for_constr;
+    std::cin >> name_for_constr;
+
+    //Конструктор нашего транспорта
+    Transports Car(name_for_constr, count_wheels_for_constr);
+    transports.emplace_back(Car); //сразу добавляем объект в конце, а не копируем его туда
+    std::cout << std::endl << "Transport added!" << std::endl;
+    return transports;
+}
+
+vektor Race(vektor &transports, double route) {
+    vektor racing;
+    for (size_t i = 0; i != transports.size(); ++i) {
+        if (transports[i].CanEndLip(route)) {
+            racing.emplace_back(transports[i]);
+        }
+    }
+    return racing;
+}
+
 
 
 
