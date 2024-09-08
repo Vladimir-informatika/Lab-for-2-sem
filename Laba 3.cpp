@@ -146,7 +146,7 @@ int main() {
             int Nwheels = 0;
             cout << "Number of wheels: ";
             Nwheels = InputProve(Nwheels);
-            while ((Nwheels < 2) || (Nwheels == 5) || (Nwheels == 7)) {
+            while (Nwheels < 2) {
                 cout << "Uncorrect number of wheels! try again:" << endl;
                 Nwheels = InputProve(Nwheels);
             }
