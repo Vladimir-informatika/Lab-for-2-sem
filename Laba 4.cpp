@@ -1,532 +1,632 @@
 #include <iostream>
-#include <vector>
-#include <string>
-#include <cmath>
+#include "cmath"
 #include <limits>
-#include <random>
+#include <string>
 
+#include <vector>
+#include <iterator>
+#include <algorithm>
+#include <iomanip>
 
-// Виртуальные деструкторы
-// обработка исключений когда переполнение идет
-// подумать как время реализовать--------------------------------- проверить
-// итерации цикла ежесекундно тоже подумать
-// схождение с трассы реализовать
-//перегрузить операторы только какие подумать
-// переделать рассчет трассы, и потом уже схождение писать, а не как я - решил сразу сошедшие отбросить
+using namespace std;
 
+class Wheel;
+class Engine;
+class Fuel_System;
 
+double refuel_time = 0.0003;
+double change_time = 0.008; 
+double dt = 0.0003;
+double InputValues(double var); 
+int InputValues(int var);
+int Menu(int& rez);
+void Clean(int var = 1);
 
-template<typename Input>
-Input InputValue(Input var) {
-    std::cin >> var;
-    if (std::cin.fail() || var <= 0)
+class Wheel {
+    double current_mileage;
+    int status; 
+public:
+    int CheckStatus(double mileage, double speed);
+    Wheel() { status = 0; current_mileage = 0; };
+    virtual ~Wheel() {};//требуется для корректной работы компилятора 
+    void DefWheel(double mileage, double speed);
+    void Output();
+    int GetStatus() { return status; }
+    void SetStatus(int status) {
+        this->status = status;
+    }
+};
+
+class Engine {
+protected:
+    double power_engine; //мощность двигателя HP horsepower
+    double consumption; //потребление двигателя литров/км l/100km
+public:
+    inline double CalculateConsumprion() { return fabs(pow(power_engine, 1 / 3) + sqrt(power_engine) - 6.25); }
+    Engine() { consumption = 0; power_engine = 0; };
+    void DefEngine(double power);
+};
+
+class Fuel_System {
+protected:
+    double current_fuel; //текущий обЪём топлива литры l;
+public:
+    double tank_capacity; //обЪём бака литры l
+    void CalculateCurrentFuel(double consumption, double mileage);
+    Fuel_System() { tank_capacity = 0; current_fuel = 0; };
+    void DefFuelSystem();
+};
+
+class Transport : public Engine, public Fuel_System {
+private:
+    int count_wheels;
+    double speed; //скорость км/ч km/h
+    double Time;    //время пути hour
+    int damaged_wheels;
+    double count_refils; //количесвто дозаправок
+    double mileage; //пробег km
+    double current_mileage;//текущее положение на круге km
+    int current_circles;
+public:
+    vector<Wheel> vec_wheels;
+    string name;
+    double pit_stop_time;
+    Transport() {
+        name = "ADDVEHICLE";
+        Time = current_mileage = mileage = count_refils = pit_stop_time = 0;
+        damaged_wheels = current_circles = 0;
+    }
+    Transport(string vehicle_name, int wheels) {
+        current_mileage = mileage = pit_stop_time = 0;
+        damaged_wheels = current_circles = 0;
+        name = vehicle_name;
+        count_wheels = wheels;
+        for (int i = 0; i < wheels; i++) {
+            Wheel newWheel;
+            vec_wheels.push_back(newWheel);
+        }
+        DefFuelSystem();
+        DefEngine(0);
+        CalculateSpeed();
+    }
+
+    void CalculateSpeed();
+    void SetMileage(double tracklen) { mileage = tracklen; }
+    ~Transport() { cout << "Destruction of " << name << endl; }
+    inline void CalculateRaceTime(double raceLength) {
+        Time = (raceLength / speed);
+    }
+    void Reset();
+
+    void TotalTime()
     {
-        while (!(std::cin >> var) || var <= 0)
+        Time = Time + pit_stop_time;
+    }
+
+    int CalculateLaps(double trackLen)
+    {
+        if (current_mileage - trackLen >= 0)
         {
-            std::cout << "Incorrect, try again!" << std::endl;
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize> :: max(), '\n');
+            current_circles = int(mileage / trackLen);
+            current_mileage = 0;
+            return 1;
+        }
+        else { return 0; }
+    }
+
+    double WheelsChange()
+    {
+        double time = damaged_wheels * change_time;
+        return time;
+    }
+
+    double RefuelTime()
+    {
+        double time = ((tank_capacity - current_fuel) * refuel_time);
+        return time;
+    }
+
+    double GetTime() { return Time; };
+    void SetTime(double Time) { this->Time = Time; };
+    double GetCountRefils() { return count_refils; };
+    void PlusCountRefuel() { count_refils++; }
+    double GetSpeed() { return speed; };
+    int GetDamagedWheels() { return damaged_wheels; };
+    double GetMileage() { return mileage; };
+    void SETmileage(double len) { this->mileage = len; };
+    void MileagePlus() { this->mileage += (speed * dt); };
+    double GetCurrentMileagee() { return current_mileage; };
+    void SetCurrentMileagee(double len) { this->current_mileage = len; };
+    void CurrentMileageePlus() { this->current_mileage += (speed * dt); };
+    int GetCurrentCircless() { return current_circles; };
+    void SetCurrentCircless(int circles) { this->current_circles = circles; };
+    void CurrentLapsPlus() { this->current_circles++; }
+    void CalculateRefuelss(double raceLength, int circles);
+    void NeedRefils(double tracklen);
+    void NeedChange();
+    void TimeDisplay();
+    int GetCountOfWheels() { return count_wheels; }
+    double GetCurrentFuels() { return current_fuel; }
+    void NumberOfDAmagedWheels();
+    void Output();
+    friend Transport* RatingResults(int qty);
+    friend void OutputResults(vector <Transport> car, int qty);
+
+    friend ostream& operator<<(ostream& stream, const Transport& obj) {
+        return stream << "\n" << "Name: " << obj.name << "\n"
+            << "Number of wheels: " << obj.count_wheels << ";\n"
+            << "Damaged wheels: " << obj.damaged_wheels << ";\n"
+            << "Speed: " << obj.speed << " km/h;\n"
+            << "Mileage: " << obj.mileage << " km;\n"
+            << "fuel capacity: " << obj.tank_capacity << " l;\n"
+            << "current fuel: " << obj.current_fuel << " l\n"
+            << "Engine power: " << obj.power_engine << " HP;\n"
+            << "Engine intake: " << obj.consumption << " l/100km;" << endl;
+    }
+
+    friend istream& operator >> (istream& stream, Transport& obj)
+    {
+        cout << "Vehicle name: ";
+        stream >> obj.name;
+        try
+        {
+            cout << "Number of wheels: ";
+            stream >> obj.count_wheels;
+            if (obj.count_wheels < 2) {
+                throw "Uncorrect number of wheels! try again";
+            }
+        }
+        catch (const char* msg) {
+            cerr << "Exception caught: " << msg << endl;
+            obj.count_wheels = InputValues(obj.count_wheels);
+        }
+        for (int i = 0; i < obj.count_wheels; i++) {
+            Wheel newWheel;
+            obj.vec_wheels.push_back(newWheel);
+        }
+        try
+        {
+            cout << "Tank capacity: ";
+            stream >> obj.tank_capacity;
+            if (obj.tank_capacity <= 0) {
+                throw "Uncorrect tank capacity! try again";
+            }
+        }
+        catch (const char* msg)
+        {
+            cerr << "Exception caught: " << msg << endl;
+            obj.tank_capacity = InputValues(obj.tank_capacity);
+        }
+        try
+        {
+            cout << "Engine power: ";
+            stream >> obj.power_engine;
+            if (obj.power_engine <= 0) {
+                throw "Uncorrect power of Engine! try again";
+            }
+        }
+        catch (const char* msg)
+        {
+            cerr << "Exception caught: " << msg << endl;
+            obj.power_engine = InputValues(obj.power_engine);
+        }
+        obj.current_fuel = obj.tank_capacity;
+        obj.DefEngine(obj.power_engine);
+        obj.CalculateSpeed();
+        return stream;
+    }
+
+    Transport& operator=(const Transport& other) {
+        name = other.name;
+        count_wheels = other.count_wheels;
+        speed = other.speed;
+        mileage = other.mileage;
+        current_mileage = other.current_mileage;
+        current_circles = other.current_circles;
+        Time = other.Time;
+        return *this;
+    }
+};
+
+int AllFinisheed(vector<Transport>& v, double trackLen, int circles);
+int Skip(vector<int> skip_id, int i);
+
+vector<Transport>RatingResults(vector<Transport> v);
+void OutputResults(vector<Transport> v);
+
+
+
+
+
+int main() {
+    srand(time(NULL));
+    vector<Transport> race_rez;
+    vector<Transport> cars;
+    int NumCircles{};
+    double trackLen = 0;
+    int flag = 1;
+    int rez = 0;
+    while (flag == 1) {
+        int choice = 10;
+        try
+        {
+            choice = Menu(rez);
+            if ((choice > 5) || (choice < 0)) {
+                throw "Error, try another number!";
+            }
+        }
+        catch (const char* msg)
+        {
+            cerr << "Exception caught: " << msg << endl;
+            cout << "try again ";
+            choice = InputValues(choice);
+        }
+        switch (choice) {
+        case (0): {
+            cout << "Are you sure you want to exit?\n1-yes\n0-go back\n";
+            int exit = 2;
+            exit = InputValues(exit);
+            if (exit == 1) {
+                flag = 0;
+                break;
+            }
+            else {
+                Clean();
+            }
+            break;
+        }
+                break;
+        case (1): {
+            Clean();
+            Transport addcar;
+            cin >> addcar;
+            cars.push_back(addcar);
+            Clean();
+            rez = 0;
+            break;
+        }
+        case (2): {
+            Clean();
+            for (int i = 0; i < cars.size(); i++) {
+                cout << cars[i];
+            }
+            break;
+        }
+        case (3): {
+            Clean();
+            try {
+                cout << "The number of circles: ";
+                NumCircles = 0;
+                NumCircles = InputValues(NumCircles);
+                if (NumCircles <= 0) {
+                    throw "Uncorrect number of circles! try again";
+                }
+            }
+            catch (const char* msg)
+            {
+                cerr << "Exception caught: " << msg << endl;
+                cout << "try again ";
+                NumCircles = InputValues(NumCircles);
+            }
+            cout << "Enter the length of the track (km): ";
+            trackLen = InputValues(trackLen);
+            rez = 0;
+            break;
+        }
+        case (4): {
+            Clean();
+            if (trackLen == 0 || NumCircles == 0) {
+                cout << "You haven't entered the length of the track!\n";
+                rez = 0;
+                break;
+            }
+            else
+            {
+                for (int i = 0; i < cars.size(); i++)
+                {
+                    cars[i].Reset();
+                }
+                double current_time = 0;
+                vector<int> skip_id{ -1 };
+                int racing_cars = cars.size();
+                while (!AllFinisheed(cars, trackLen, NumCircles))
+                {
+                    if (racing_cars <= 0)
+                    {
+                        break;//не работает если переместить это условие в while
+                    }
+                    for (int i = 0; i < cars.size(); i++)
+                    {
+                        int exit = 0;
+                        if (find(skip_id.begin(), skip_id.end(), i) == skip_id.end())
+                        {
+                            cars[i].MileagePlus();
+                            cars[i].CurrentMileageePlus();
+                            for (int j = 0; j < cars[i].vec_wheels.size(); j++)
+                            {
+                                cars[i].vec_wheels[j].DefWheel(cars[i].GetMileage(), cars[i].GetSpeed());
+                            }
+                            cars[i].NumberOfDAmagedWheels();
+                            cars[i].CalculateCurrentFuel(cars[i].CalculateConsumprion(), cars[i].GetCurrentMileagee());
+                            cars[i].CalculateSpeed();
+                            cars[i].SetTime(current_time);
+                            cars[i].TimeDisplay();
+                            cout << "car: " << cars[i].name
+                                << " circle: " << cars[i].GetCurrentCircless() + 1
+                                << " speed: " << cars[i].GetSpeed() << "\n"
+                                << " Current fuel " << cars[i].GetCurrentFuels()
+                                << " Damaged wheels: " << cars[i].GetDamagedWheels() << "\n"
+                                << " Mileage: " << cars[i].GetMileage() << "\n";
+                            if (cars[i].GetDamagedWheels() == cars[i].vec_wheels.size() || (cars[i].GetCurrentFuels() <= 0))
+                            {
+                                exit = 1;
+                                cars[i].SetTime(current_time);
+                                cars[i].CurrentLapsPlus();
+                            }
+                            if ((trackLen * NumCircles) - (cars[i].GetMileage()) <= 0)
+                            {
+                                exit = 1;
+                                cars[i].SetTime(current_time);
+                                cars[i].SetCurrentCircless(NumCircles);
+                                cars[i].TimeDisplay();
+                                cout << "" << cars[i].name << " just finished" << endl;
+                            }
+                            if (exit == 1)
+                            {
+                                skip_id.push_back(i); // ТС будет пропускаться, так как финишировала
+                                racing_cars = racing_cars - 1;
+                                break;
+                            }
+                            if (cars[i].CalculateLaps(trackLen))
+                            {
+                                cars[i].NeedRefils(trackLen);
+                                cars[i].NeedChange();
+                            }
+                        }
+                        else
+                        {
+                            continue; // Пропускаем итерацию
+                        }
+                    }
+                    current_time += dt;
+                }
+                for (int i = 0; i < cars.size(); i++)
+                {
+                    cars[i].TotalTime();
+                }
+            }
+            break;
+        }
+        case (5): {
+            Clean();
+            OutputResults(cars);
+            break;
+        }
+        default:
+            Clean();
+            break;
+        }
+    }
+    return 0;
+}
+
+void Clean(int var) {
+    for (int i = 0; i < 3; i = i + 1) {
+        cout << "\n";
+    }
+}
+
+int Menu(int& rez) {
+    cout << "\n-------------MENU------------\n";
+    cout << "1 - Add Transport\n";
+    cout << "2 - Output info about Transport\n";
+    cout << "3 - Input distance\n";
+    cout << "4 - Calculate the route\n"; //расчет прохождения трассы
+    if (rez == 1)
+        cout << "5 - Output results of last race\n";
+    cout << "0 - Quit the program\n";
+    int choice = 0;
+    choice = InputValues(choice);
+    if (choice == 4) {
+        rez = 1;
+    }
+    return choice;
+}
+
+vector<Transport>  RatingResults(vector<Transport> v) {
+    sort(v.begin(), v.end(), [](Transport& a, Transport& b) {
+        if (a.GetTime() != b.GetTime()) {
+            return a.GetTime() < b.GetTime();
+        }
+        else {
+            return a.GetCountRefils() < b.GetCountRefils();
+        }
+        });
+    return v;
+}
+
+void OutputResults(vector<Transport> v) {
+    vector<Transport> results = RatingResults(v);
+    for (int i = 0; i < results.size(); i++) {
+        cout << results[i].name << endl;
+        results[i].TimeDisplay();
+        cout << "Circles " << results[i].GetCurrentCircless() << endl;
+        cout << "Refuel times: " << int(results[i].GetCountRefils()) << endl << endl;
+    }
+}
+
+double InputValues(double var) {
+    cin >> var;
+    if (cin.fail() || var <= 0) {
+        while (!(cin >> var) || var <= 0) {
+            cout << "Uncorrect, try again\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
     }
     return var;
 }
 
-template<typename Type>
-Type max(Type a, Type b) {
-    return (a >= b ? a : b);
-}
-
-
-
-int Probability();
-
-
-class Wheel;
-class Fuel_System;
-class Engine;
-class Transports;
-
-using vektor = std::vector<Transports>;
-
-
-class Wheel {
-private:
-    double current_mileage;
-    bool status;
-public:
-    Wheel();
-    bool CheckStatus();
-    void DefWheel(double mileage, double speed);
-    bool GetStatus();
-    virtual void Output();
-    virtual ~Wheel();
-};
-
-Wheel::Wheel() {
-    current_mileage = 0;
-    status = true;
-}
-bool Wheel::CheckStatus(){
-    const int probability = Probability();
-    if (current_mileage >= 60000) return false;
-    else if (current_mileage >= 45000 && current_mileage < 60000) {
-        if (probability <= 75) {
-            return false;
+int InputValues(int var) {
+    cin >> var;
+    if (cin.fail() || var < 0) {
+        while (!(cin >> var) || var < 0) {
+            cout << "Uncorrect, try again\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
-        else return true;
     }
-
-    else if (current_mileage >= 30000 && current_mileage < 45000) {
-        if (probability <= 50) {
-            return false;
-        }
-        else return true;
-    }
-    else if (current_mileage >= 15000 && current_mileage < 30000) {
-        if (probability <= 25) {
-            return false;
-        }
-        else return true;
-    }
-    else if (current_mileage > 5000 && current_mileage < 15000) {
-        if (probability < 10) {
-            return false;
-        }
-        else return true;
-    }
-    else return true;
+    return var;
 }
 
 void Wheel::DefWheel(double mileage, double speed) {
-    current_mileage += mileage;
-    if (status) status = CheckStatus();
-}
-
-bool Wheel::GetStatus() {
-    return status;
-}
-void Wheel::Output() {
-    if (!status){
-        std::cout << "Damaged" << std::endl;
-    }
-    else{
-        std::cout << "Not damaged" << std::endl;
-    }
-}
-
-
-
-class Engine
-{
-protected:
-    double power;
-    double consumption;
-public:
-    Engine();
-    void DefEngine(double powerEn);
-    inline double Calculate_Consumption(); // define
-    virtual void Output();
-    virtual ~Engine();
-};
-
-Engine::Engine() {
-    power = consumption = 0;
-}
-
-void Engine::DefEngine(double powerEn) {
-    std::cout << "Engine power in HP: ";
-    powerEn = InputValue<double>(powerEn);
-    power = powerEn;
-    consumption = Calculate_Consumption();
-}
-
-void Engine::Output() {
-    std::cout << "Power of engine: " << power << " HP" << std::endl;
-    std::cout << "Consumption of engine: " << consumption << " l/100 km" << std::endl;
-}
-
-double Engine::Calculate_Consumption() {
-    return fabs(pow(power, 1/3) + sqrt(power) - 6.25);
-}
-
-
-
-
-class Fuel_System
-{
-protected:
-    double volume_tank;
-    double current_fuel;
-public:
-    Fuel_System();
-    void CalculateCurrentFuel(double power, int distance, double refills);
-    void DefFuelSystem(double capacity, double mileage);
-    virtual void Output();
-    virtual ~Fuel_System();
-};
-
-Fuel_System::Fuel_System() {
-    volume_tank = current_fuel = 0;
-}
-
-void Fuel_System::CalculateCurrentFuel(double consumption, int distance, double refills = 0) {
-    if (refills == 0) {
-        current_fuel = volume_tank - distance * ( consumption /100 );
+    if (mileage == 0.) {
+        current_mileage = 0.;
+        status = 0.;
     }
     else {
-        current_fuel = (distance * (consumption / 100)) - (refills * volume_tank);
+        current_mileage = mileage;
+        status = CheckStatus(current_mileage, speed);
     }
 }
 
-void Fuel_System::DefFuelSystem(double capacity, double mileage) {
-    std::cout << "Input Volume Tank in l:";
-    capacity = InputValue<double>(capacity);
-    volume_tank = capacity;
+
+int Wheel::CheckStatus(double mileage, double speed) {
+    if (status == 0)
+    {
+        int end = ceil(sqrt(mileage)) + ceil(sqrt(speed));
+        int start = -1000;//компенсирую большое кол-во итераций
+        int ratio = ceil(((mileage) * (sqrt(speed) + 1)));
+        int damageProb = rand() % (end - (start)+ratio) + start;
+        if (damageProb - end >= 0)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else return 1;
+}
+void Wheel::Output() {
+    if (status == 1) {
+        cout << "damaged" << endl;
+    }
+    else {
+        cout << "not damaged" << endl;
+    }
+}
+
+void Engine::DefEngine(double power) {
+    power_engine = power;
+    consumption = CalculateConsumprion();
+}
+
+void Fuel_System::CalculateCurrentFuel(double consumption, double mileage) { //расчёт текущего обЪёма топлива
+    current_fuel = double(tank_capacity - ((consumption / 100) * mileage));
+}
+
+void Fuel_System::DefFuelSystem() {
+    cout << "fuel capacity: ";
+    double capacity = 0.;
+    capacity = InputValues(capacity);
+    tank_capacity = capacity;
     current_fuel = capacity;
 }
 
-void Fuel_System::Output() {
-    std::cout << "Fuel capacity: " << volume_tank << " l" << std::endl;
-    std::cout << "Current fuel: " << current_fuel << " l" << std::endl
-    << "-----------------------------" << std::endl;
-}
 
-
-// 1 колесо за 0,5 сек, заливаем бак со скоростью литр/секунда. дозаправка при условии если полбака ушло
-
-class Transports : public Engine, public Fuel_System
+void Transport::TimeDisplay()
 {
-private:
-    int count_wheels;
-    double speed;
-    double time;
-    int damaged_wheels = 0;
-    double mileage;
-    int refills;
-public:
-    std::vector<Wheel> wheel_vector;
-    std::vector<double> pit_stop_time;
-    std::string name;
-    Transports();
-    Transports(const std::string &name_Transports, int wheels);
-    void CalculateSpeed();
-    void SetName(const std::string &name_Transports);
-    void SetWheels(int countWheels);
-    void SetMileage(double distance);
-    double GetTime();
-    double GetRefills();
-    double GetSpeed();
-    double GetConsumption();
-    void CalculateRefills(double distance);
-    void TimeDisplay();
-    int GetWheels();
-    void NumberOfDamagedWheels();
-    int GetDamagedWheels();
-    inline void CalculateRaceTime(double distance, double pit_stop);
-    void Output() override;
-    friend vektor RacingResults(vektor &transp);
-    friend void OutputResult(vektor &transp);
-
-    double GetVolumeTank();
-    double GetCurrentFuel();
-    bool CanEndLap(double route);
-
-    friend void GameCycle(const vektor &race);
-
-    friend std::ostream& operator << (std::ostream &os, const Transports &obj);
-    ~Transports();
-};
-
-
-std::ostream& operator << (std::ostream &os, const Transports &obj) {
-    return os <<"\n"<<"Name: "<<obj.name<<"\n"
-                  << "Number of wheels: " << obj.count_wheels << ";\n"
-                  << "Damaged wheels: " << obj.damaged_wheels << ";\n"
-                  << "Speed: " << obj.speed << " km/h;\n"
-                  << "Mileage: " << obj.mileage << " km;\n"
-                  << "fuel capacity: " << obj.volume_tank << " l;\n"
-                  << "current fuel: " << obj.current_fuel << " l\n"
-                  << "engine power: " << obj.power << " HP;\n"
-                  << "engine intake: " << obj.consumption << " l/100km;" << std::endl;
+    double t = this->Time;
+    int hours = int(t);
+    double cur_time = (t - hours) * 60;
+    int minutes = int(cur_time);
+    int seconds = int((cur_time - minutes) * 60);
+    cout << "TIME: " << setw(4) << setfill('0') << hours << ":" << setw(2) << setfill('0') << minutes << ":" << setw(2) << setfill('0') << seconds << endl;
 }
-Transports::Transports() {
-    name = "AddTransports";
-    count_wheels = speed = time = mileage = refills = damaged_wheels = 0;
-}
-Transports::Transports(const std::string &name_Transports, int wheels) {
-    mileage = damaged_wheels = 0;
-    name = name_Transports;
-    count_wheels = wheels;
-    for (size_t i = 0; i != wheels; i++) wheel_vector[i] = Wheel();
-    DefFuelSystem(0, mileage);
-    DefEngine(0);
-    CalculateSpeed();
-}
-void Transports::CalculateSpeed() {
-    if (damaged_wheels == 0) speed = double(fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5)));
-    else speed = fabs( sqrt(power) * (70.0 / double(count_wheels) - 2.5)) / (pow(2, double(damaged_wheels)));
-}
-void Transports::CalculateRefills(double distance) {
-    refills = floor((distance * (consumption / 100)) / volume_tank);
-}
-void Transports::TimeDisplay()
+
+void Transport::CalculateSpeed()
 {
-    int hours = (int) time;
-    double tim = (time - hours) * 60;
-    int minutes = (int)tim;
-    int seconds = int((tim - minutes) * 60);
-
-    if (hours < 24)
-    {
-        std::cout << hours << ":" << minutes << ":" << seconds << std::endl;
+    if (damaged_wheels == 0) {
+        speed = double(fabs(sqrt(power_engine) * (70.0 / double(count_wheels) - 2.5) / sqrt(current_fuel)));
     }
     else
     {
-        int days = (int) time/24;
-        hours = int(time  - days*24);
-        std::cout << days << " days " << hours << " hours " << minutes << " minutes " << seconds << " seconds" << std::endl;
+        speed = (fabs(sqrt(power_engine) * (70.0 / double(count_wheels) - 2.5) / sqrt(current_fuel)) * (pow(0.75, double(damaged_wheels))));
     }
 }
-int Transports::GetWheels() {
-    return count_wheels;
-}
-void Transports::NumberOfDamagedWheels() {
+
+void Transport::NumberOfDAmagedWheels()
+{
     int count = 0;
-    for (size_t i = 0; i != count_wheels; i++) if (!wheel_vector[i].GetStatus()) count++;
+    for (int i = 0; i < vec_wheels.size(); i++)
+    {
+        if (vec_wheels[i].GetStatus() == 1) {
+            count++;
+        }
+    }
     damaged_wheels = count;
 }
-void Transports::Output() {
-    std::cout << name << std::endl
-    << "Count wheels: " << count_wheels << std::endl
-    << "Damaged wheels: " << damaged_wheels << std::endl
-    << "Speed: " << speed << " km/h" << std::endl
-    << "Mileage: " << mileage << " km" << std::endl;
-    Engine::Output();
-    Fuel_System::Output();
-}
-void Transports::SetName(const std::string &name_Transports) {
-    name = name_Transports;
-}
-void Transports::SetWheels(int countWheels) {
-    count_wheels = countWheels;
-}
-void Transports::SetMileage(double distance) {
-    mileage += distance;
-}
-double Transports::GetTime() {
-    return time;
-}
-double Transports::GetRefills() {
-    return refills;
-}
-double Transports::GetConsumption() {
-    return consumption;
-}
-double Transports::GetSpeed() {
-    return speed;
-}
-Transports::~Transports() {
-    std::cout << "Destruct " << name << std::endl;
-}
-void Transports::CalculateRaceTime(double distance, double pit_stop) {
-    time = (distance / speed) + pit_stop;
-}
-bool Transports::CanEndLap(double route) {
-    if (((route * (consumption / 100)) / volume_tank) > 1) return false;
-    else return true;
-}
-double Transports::GetVolumeTank() {
-    return volume_tank;
-}
-double Transports::GetCurrentFuel() {
-    return current_fuel;
-}
-int Transports::GetDamagedWheels() {
-    return damaged_wheels;
-}
-// class MyClass {
-// public:
-//     int data;
-//     MyClass(int a) {
-//         data = a;
-//     };
-// };
-///////////////////////////////////////////////////////////////
 
-int Menu();
-vektor AddTransport(vektor &transports);
-vektor Race(vektor &transports, double route);
-void GameCycle();
-vektor RacingResults(vektor &transp);
-
-
-
-
-void OutputResult(vektor &transp);
-
-
-int main() {
-    vektor transports;
-    double distance = 0;
-    double route = 0;
-    double pit_stop = 0;
-    int rings = 0;
-    bool menu = true;
-    bool flag = false;
-
-    while (menu) {
-        switch(Menu()) {
-            case 1:
-                AddTransport(transports);
-                flag = false;
-                break;
-            case 2:
-                if (transports.empty())
-                {
-                    std::cout << "Julius Sergeevich, you didn't add any transport. What did you expected to see?" << std::endl;
-                }
-                else for (size_t i = 0; i != transports.size(); i ++) transports[i].Output();
-                break;
-            case 3:
-                std::cout << "Input length of the lip" << std::endl;
-                route = InputValue<double>(route);
-                std::cout << "Input count of lips" << std::endl;
-                rings = InputValue<int>(rings);
-                distance = route * rings;
-                std::cout << std::endl;
-                flag = false;
-                break;
-            case 4:
-                if (transports.empty() || distance == 0) {
-                    std::cout << "Array of transport is empty or distance is null\n";
-                }
-                else {
-                    //////////////////// СДЕЛАТЬ ГЛОБАЛЬНЫЙ ЦИКЛ ТУТ, ЛУЧШЕ КОНЕЧНО В ОТДЕЛЬНЫЙ МЕТОД ЕГО ВЫНЕСТИ
-                    flag = true;
-                    std::cout << "Calculating...\n";
-                }
-                break;
-            case 5:
-                if (!flag) {
-                    std::cout << "No-no-no! Firstly calculate THESE routes for each transport! Have you just changed distance and didn't calculate it for each transport?" << std::endl;
-                }
-                else {
-                    OutputResult(transports);
-                }
-                break;
-            case 6:
-                std::cout << "Are you sure? (y/n)" << std::endl;
-                char quit;
-                std::cin >> quit;
-                if (quit == 'y' || quit == 'Y')
-                {
-                    std::cout << "OK, as you wish" << std::endl;
-                    transports.resize(0);
-                    menu = false;
-                }
-                break;
-            default:
-                std::cout << "Hmm, incorrect!!!" << std::endl;
-                break;
-        }
-    }
-    // MyClass class1(1);
-    // std::cout << classes.size() << std::endl;
-    // classes.push_back(class1);
-    // std::cout << classes.size() << std::endl;
-    // classes.pop_back();
-    // std::cout << classes.size() << std::endl;
-
-    return 0;
-}
-
-int Menu ()
+void Transport::NeedRefils(double tracklen)
 {
-    std::cout << "========================================" << std::endl;
-    std::cout << "\tMENU" << std::endl;
-    std::cout << "1. Add transport" << std::endl;
-    std::cout << "2. Show existing transports" << std::endl;
-    std::cout << "3. Enter/change route length" << std::endl;
-    std::cout << "4. Calculate routes for each transport" << std::endl;
-    std::cout << "5. See the result of completing the route" << std::endl;
-    std::cout << "6. Quit the program\n" << std::endl;
-    std::cout << "Your choice: " << std::endl;
-    int choice = 0;
-    choice = InputValue<int>(choice);
-    std::cout << '\n';
-    return choice;
-}
-vektor AddTransport(vektor &transports) {
-    std::cout << "Input count of wheels: ";// количество колес;
-    int count_wheels_for_constr = 0;
-    count_wheels_for_constr = InputValue<int>(count_wheels_for_constr);
-
-
-    std::cout << "Input the name of transport :";  //название.
-    std::string name_for_constr;
-    std::cin >> name_for_constr;
-
-    //Конструктор нашего транспорта
-    Transports Car(name_for_constr, count_wheels_for_constr);
-    transports.emplace_back(Car); //сразу добавляем объект в конце, а не копируем его туда
-    std::cout << std::endl << "Transport added!" << std::endl;
-    return transports;
-}
-
-vektor Race(vektor &transports, double route) {
-    vektor racing;
-
-
-    for (size_t i = 0; i != transports.size(); ++i) {
-        if (transports[i].CanEndLap(route)) {
-            racing.emplace_back(transports[i]);
-        }
+    if (current_fuel < (consumption * 100) * tracklen)
+    {
+        this->PlusCountRefuel();
+        pit_stop_time += this->RefuelTime();
+        current_fuel = tank_capacity;
     }
-    ////остальные может просто тут вывести хз
-    return racing;
 }
 
-int Probability() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    return gen() % 100;
-}
-
-void GameCycle(const vektor &race) {
-    double max_time = 0;
-    for (size_t i = 0; i != race.size(); ++i) {
-        if (race[i].time - max_time > 0) max_time = race[i].time;
-    }
-    const double race_time = max_time;
-
-}
-
-void OutputResult(vektor &transp)
+void Transport::NeedChange()
 {
-    vektor results = RacingResults(transp);
-    std::cout << "Name\t\t\tRefills\t\t\tTravel time\n";
-    for (size_t i = 0; i != transp.size(); ++i) {
-        std::cout << results[i].name << "\t\t\t" << results[i].refills << "\t\t\t";
-        results[i].TimeDisplay();
-    }
-}
-
-vektor RacingResults(vektor &transp) {
-    vektor result;
-    vektor temp;
-    Transports Car;
-    temp.push_back(Car);
-    for (size_t i = 0; i != transp.size(); ++i) {
-        result[i] = transp[i];
-    }
-    for (size_t i = 0; i != transp.size(); ++i) {
-        for (size_t j = 0; j < transp.size(); ++j) {
-            if ((result[i].GetTime() - result[j].GetTime() < 0) && (result[i].GetRefills() - result[i].GetRefills() <= 0)) {
-                temp[0] = result[i];
-                result[i] = result[j];
-                result[j] = temp[0];
+    if (damaged_wheels != 0)
+    {
+        pit_stop_time += this->WheelsChange();
+        for (int i = 0; i < vec_wheels.size(); i++)
+        {
+            if (vec_wheels[i].GetStatus() == 1)
+            {
+                vec_wheels[i].DefWheel(0., 0.);
             }
         }
     }
-    return result;
 }
+
+void Transport::Reset()
+{
+    for (int i = 0; i < vec_wheels.size(); i++)
+    {
+        vec_wheels[i].SetStatus(0);
+    }
+    damaged_wheels = 0;
+    current_mileage = mileage = 0;
+    count_refils = current_circles = 0;
+    Time = 0;
+    current_fuel = tank_capacity;
+    CalculateSpeed();
+    for (int j = 0; j < vec_wheels.size(); j++)
+    {
+        vec_wheels[j].DefWheel(mileage, GetSpeed());
+    }
+    cout << "\n" << name << " reseted" << endl;
+}
+
+int AllFinisheed(vector<Transport>& v, double trackLen, int circles)
+{
+    int count = 0;
+    for (int i = 0; i < v.size(); i++)
+    {
+        if (v[i].GetCurrentMileagee() - trackLen * circles >= 0)
+        {
+            count++;
+        }
+    }
+    if (count == v.size())
+    {
+        return 1;
+    }
+    else return 0;
+}
+
