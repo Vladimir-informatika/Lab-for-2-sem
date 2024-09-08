@@ -2,7 +2,6 @@
 #include <iostream>
 #include <limits>
 #include <string>
-#include <ctime>
 
 using namespace std;
 int quantity = 0; //изначальный размер массива
