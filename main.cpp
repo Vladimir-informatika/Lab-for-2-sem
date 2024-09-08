@@ -46,7 +46,7 @@ public:///////////////////////////////////////////////////////
         SetName(vehicle_name);
         cout << "Number of wheels: ";
         wheels = InputProve(wheels);
-        while ((wheels < 2) || (wheels == 5) || (wheels == 7)) {
+        while (wheels < 2) {
             cout << "Uncorrect number of wheels! try again:" << endl;
             wheels = InputProve(wheels);
         }
